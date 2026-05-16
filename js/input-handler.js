@@ -148,7 +148,9 @@ export function initInputHandlers(canvas, renderFunc) {
 
             if (stepX !== 0 || stepY !== 0) {
                 const selected = state.entities.filter(en => state.selectedIds.includes(en.id));
-                const newPositions = selected.map(en => {
+                const oldPositions = selected.map(en => ({ id: en.id, x: en.x, y: en.y }));
+                
+                let newPositions = selected.map(en => {
                     let nx = en.x + dx;
                     let ny = en.y + dy;
                     if (state.snapToGrid) {
@@ -163,26 +165,54 @@ export function initInputHandlers(canvas, renderFunc) {
                 let maxX = Math.max(...newPositions.map(p => p.x + p.w));
                 let maxY = Math.max(...newPositions.map(p => p.y + p.h));
 
-                if (minX >= 0 && maxX <= state.width && minY >= 0 && maxY <= state.height) {
-                    // Calcular bounding box del grupo para las guías y magnetismo
-                    const groupRect = {
-                        x: minX, y: minY,
-                        w: maxX - minX, h: maxY - minY
-                    };
-                    const snapped = checkSmartGuides(groupRect);
+                // 1. Clamping para mantener dentro del canvas (sin bloquear el arrastre)
+                let clampOffsetX = 0;
+                let clampOffsetY = 0;
+
+                if (minX < 0) clampOffsetX = -minX;
+                else if (maxX > state.width) clampOffsetX = state.width - maxX;
+
+                if (minY < 0) clampOffsetY = -minY;
+                else if (maxY > state.height) clampOffsetY = state.height - maxY;
+
+                // Aplicar clamping
+                minX += clampOffsetX;
+                minY += clampOffsetY;
+                maxX += clampOffsetX;
+                maxY += clampOffsetY;
+
+                // 2. Calcular magnetismo basado en la posición ya clampada
+                const groupRect = {
+                    x: minX, y: minY,
+                    w: maxX - minX, h: maxY - minY
+                };
+                const snapped = checkSmartGuides(groupRect);
+                
+                let magOffsetX = snapped.x - minX;
+                let magOffsetY = snapped.y - minY;
+
+                // Evitar que el magnetismo empuje fuera de los bordes nuevamente
+                if (minX + magOffsetX < 0 || maxX + magOffsetX > state.width) magOffsetX = 0;
+                if (minY + magOffsetY < 0 || maxY + magOffsetY > state.height) magOffsetY = 0;
+
+                let actualMoveX = 0;
+                let actualMoveY = 0;
+
+                newPositions.forEach(pos => {
+                    const en = selected.find(e => e.id === pos.id);
+                    const oldPos = oldPositions.find(e => e.id === pos.id);
                     
-                    // Aplicar el desfase del magnetismo a todas las entidades del grupo
-                    const offsetX = snapped.x - minX;
-                    const offsetY = snapped.y - minY;
+                    en.x = pos.x + clampOffsetX + magOffsetX;
+                    en.y = pos.y + clampOffsetY + magOffsetY;
 
-                    newPositions.forEach(pos => {
-                        const en = selected.find(e => e.id === pos.id);
-                        en.x = pos.x + offsetX;
-                        en.y = pos.y + offsetY;
-                    });
+                    // Registrar cuánto se movió realmente el líder del grupo
+                    actualMoveX = en.x - oldPos.x;
+                    actualMoveY = en.y - oldPos.y;
+                });
 
-                    state.dragStart = coords;
-                }
+                // 3. Actualizar dragStart de forma relativa para no perder el 'agarre' del ratón
+                if (actualMoveX !== 0) state.dragStart.x += actualMoveX;
+                if (actualMoveY !== 0) state.dragStart.y += actualMoveY;
             }
             updateSelectionStats();
             renderFunc();
@@ -199,8 +229,16 @@ export function initInputHandlers(canvas, renderFunc) {
             const right = en.x + en.w;
             const bottom = en.y + en.h;
 
-            if (state.resizeHandle.includes('e')) en.w = Math.max(sx, Math.round((cx - en.x) / sx) * sx);
-            if (state.resizeHandle.includes('s')) en.h = Math.max(sy, Math.round((cy - en.y) / sy) * sy);
+            if (state.resizeHandle.includes('e')) {
+                let newW = Math.max(sx, Math.round((cx - en.x) / sx) * sx);
+                if (en.x + newW > state.width) newW = state.width - en.x;
+                en.w = newW;
+            }
+            if (state.resizeHandle.includes('s')) {
+                let newH = Math.max(sy, Math.round((cy - en.y) / sy) * sy);
+                if (en.y + newH > state.height) newH = state.height - en.y;
+                en.h = newH;
+            }
             
             if (state.resizeHandle.includes('w')) {
                 const newX = Math.max(0, Math.min(right - sx, Math.round(cx / sx) * sx));
