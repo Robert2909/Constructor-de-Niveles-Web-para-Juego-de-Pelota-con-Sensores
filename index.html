@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LevelBuilder Web | Juego de Pelota</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app">
+        <header>
+            <div class="logo">
+                <h1>LEVEL<span>BUILDER</span></h1>
+                <div class="level-id-container">
+                    <span>Nivel</span>
+                    <input type="number" id="levelIdInput" value="1" min="1">
+                </div>
+            </div>
+            <div class="top-actions">
+                <button id="btnOpenImport" class="btn-secondary">IMPORTAR</button>
+                <button id="btnExport" class="btn-primary">EXPORTAR JSON</button>
+            </div>
+        </header>
+
+        <main>
+            <aside class="sidebar left">
+                <div class="sidebar-header">
+                    <h2>ENTIDADES</h2>
+                </div>
+                <div class="tool-section scrollable">
+                    <div class="tool-grid" id="entityGrid">
+                        <!-- Botones de entidades (generados dinámicamente o estáticos pero escalables) -->
+                        <button class="tool-btn active" data-type="wall" title="Muro (Bloque sólido)" draggable="true">
+                            <div class="icon wall"></div>
+                            <span>Muro</span>
+                        </button>
+                        <button class="tool-btn" data-type="hazard" title="Lava (Mortal)" draggable="true">
+                            <div class="icon hazard"></div>
+                            <span>Lava</span>
+                        </button>
+                        <button class="tool-btn" data-type="start" title="Punto de Inicio" draggable="true">
+                            <div class="icon start"></div>
+                            <span>Inicio</span>
+                        </button>
+                        <button class="tool-btn" data-type="goal" title="Meta" draggable="true">
+                            <div class="icon goal"></div>
+                            <span>Meta</span>
+                        </button>
+                        <button id="btnPerimeter" class="tool-btn" title="Generar Perímetro Mortal">
+                            <div class="icon perimeter"></div>
+                            <span>Perímetro</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="tool-section">
+                    <h3>VISTA</h3>
+                    <div class="control-group-vertical">
+                        <label>Nivel de Zoom</label>
+                        <div class="zoom-control-group">
+                            <button id="zoomOut" class="mode-btn small-btn" title="Alejar">
+                                <span>−</span>
+                            </button>
+                            <button id="resetZoom" class="mode-btn active" title="Restablecer 1:1">
+                                <span id="zoomLabel">100%</span>
+                            </button>
+                            <button id="zoomIn" class="mode-btn small-btn" title="Acercar">
+                                <span>+</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tool-section">
+                    <h3>OPCIONES</h3>
+
+                    <!-- 1. Modo de Construcción -->
+                    <div class="control-group-vertical">
+                        <label>Modo de Construcción</label>
+                        <div class="mode-toggle-group">
+                            <button id="modeBlock" class="mode-btn active" title="Modo Bloques">
+                                <div class="icon-small block"></div>
+                                <span>Bloques</span>
+                            </button>
+                            <button id="modeBrush" class="mode-btn" title="Modo Pincel">
+                                <div class="icon-small brush"></div>
+                                <span>Pincel</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 2. Magnetismo -->
+                    <div class="control-group-vertical">
+                        <label>Ajuste de Rejilla</label>
+                        <div class="mode-toggle-group">
+                            <button id="snapOn" class="mode-btn active" title="Magnetismo Activado">
+                                <div class="icon-small snap-on"></div>
+                                <span>Magnetismo</span>
+                            </button>
+                            <button id="snapOff" class="mode-btn" title="Movimiento Libre">
+                                <div class="icon-small snap-off"></div>
+                                <span>Libre</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3. Configuración de Mundo -->
+                    <div class="control-group-vertical">
+                        <label>Densidad de Rejilla</label>
+                        <div class="grid-inputs">
+                            <div class="sub-group" style="grid-column: span 1.5;">
+                                <label>Columnas (X)</label>
+                                <input type="number" id="gridCols" value="40" min="10" max="200" class="styled-input">
+                            </div>
+                            <div class="sub-group" style="grid-column: span 1.5;">
+                                <label>Filas (Y)</label>
+                                <input type="number" id="gridRows" value="24" min="10" max="200" class="styled-input">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <main id="canvas-container">
+                <canvas id="editorCanvas"></canvas>
+                <div id="status-bar">
+                    <div id="coordInfo">X: 0, Y: 0</div>
+                    <div id="selectionStats" class="hidden">
+                        <span class="divider">|</span>
+                        <span id="statW">Ancho: 0 celdas</span>
+                        <span class="divider">|</span>
+                        <span id="statH">Alto: 0 celdas</span>
+                    </div>
+                </div>
+            </main>
+
+            <aside class="sidebar right">
+                <div class="sidebar-header">
+                    <h2>PROPIEDADES</h2>
+                </div>
+                <div id="propertiesPanel" class="tool-section">
+                    <div id="no-selection" class="info-msg">
+                        Selecciona un objeto para editar
+                    </div>
+                    <div id="selection-controls" class="hidden">
+                        <div class="control-group">
+                            <label>Tipo</label>
+                            <span id="propType" class="prop-val">Wall</span>
+                        </div>
+                        <div class="control-group">
+                            <label>X</label>
+                            <input type="number" id="propX">
+                        </div>
+                        <div class="control-group">
+                            <label>Y</label>
+                            <input type="number" id="propY">
+                        </div>
+                        <div class="control-group">
+                            <label>Ancho</label>
+                            <input type="number" id="propW">
+                        </div>
+                        <div class="control-group">
+                            <label>Alto</label>
+                            <input type="number" id="propH">
+                        </div>
+                        <button id="btnDelete" class="btn-danger-alt">ELIMINAR OBJETO</button>
+                    </div>
+                </div>
+
+                <div class="tool-section">
+                    <h3>TRANSFORMACIONES</h3>
+                    <div id="transform-panel" class="disabled-ui">
+                        <div class="mode-toggle-group">
+                            <button id="mirrorH" class="mode-btn" title="Espejo Horizontal">
+                                <div class="icon-small mirror-h"></div>
+                                <span>Espejo H</span>
+                            </button>
+                            <button id="mirrorV" class="mode-btn" title="Espejo Vertical">
+                                <div class="icon-small mirror-v"></div>
+                                <span>Espejo V</span>
+                            </button>
+                        </div>
+                        <div class="mode-toggle-group">
+                            <button id="rotateL" class="mode-btn" title="Rotar 90° Izquierda">
+                                <div class="icon-small rotate-l"></div>
+                                <span>Rotar -90°</span>
+                            </button>
+                            <button id="rotateR" class="mode-btn" title="Rotar 90° Derecha">
+                                <div class="icon-small rotate-r"></div>
+                                <span>Rotar +90°</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tool-section json-section">
+                    <h3>JSON DE SALIDA</h3>
+                    <textarea id="jsonOutput" readonly placeholder="El JSON aparecerá aquí..."></textarea>
+                    <button id="btnCopy" class="btn-small">COPIAR AL PORTAPAPELES</button>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- Modal para importar -->
+    <div id="modalImport" class="modal hidden">
+        <div class="modal-content">
+            <h2>Importar Nivel</h2>
+            <p>Pega el JSON del nivel aquí:</p>
+            <textarea id="txtImportJson"></textarea>
+            <div class="modal-actions">
+                <button id="btnDoImport" class="btn-primary">CARGAR</button>
+                <button id="btnCloseModal" class="btn-secondary">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="editor.js"></script>
+</body>
+
+</html>
