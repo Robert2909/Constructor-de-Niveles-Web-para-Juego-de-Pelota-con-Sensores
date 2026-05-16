@@ -215,6 +215,7 @@ export function initInputHandlers(canvas, renderFunc) {
                 if (actualMoveY !== 0) state.dragStart.y += actualMoveY;
             }
             updateSelectionStats();
+            updateProperties();
             renderFunc();
         }
 
@@ -276,6 +277,7 @@ export function initInputHandlers(canvas, renderFunc) {
             }
 
             updateSelectionStats();
+            updateProperties();
             renderFunc();
         }
 
@@ -481,7 +483,10 @@ export function initKeyboardHandlers(renderFunc) {
                     en.x = pos.x;
                     en.y = pos.y;
                 });
-                updateJSON(); renderFunc();
+                updateSelectionStats();
+                updateProperties();
+                updateJSON();
+                renderFunc();
             }
         }
         // Ctrl + S: Alternar Snap

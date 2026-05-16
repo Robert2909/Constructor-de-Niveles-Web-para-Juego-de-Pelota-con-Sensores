@@ -172,7 +172,7 @@ export function updateSelectionStats() {
         const currentW = Math.round(totalW);
         const currentH = Math.round(totalH);
 
-        if (selectionChanged || (!isFocused && (inputScaleW.value === "" || inputScaleW.value === "---"))) {
+        if (selectionChanged || state.isDragging || state.isResizing || (!isFocused && (inputScaleW.value === "" || inputScaleW.value === "---"))) {
             inputScaleW.type = "number";
             inputScaleH.type = "number";
             inputScaleW.value = currentW;
