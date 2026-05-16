@@ -399,7 +399,8 @@ export function checkSmartGuides(rect) {
         { div: 6, color: 'rgba(234, 179, 8, 0.7)', base: 3 },  // Amarillo
         { div: 4, color: 'rgba(239, 68, 68, 0.7)', base: 2 },  // Rojo
         { div: 8, color: 'rgba(239, 68, 68, 0.7)', base: 2 },  // Rojo
-        { div: 5, color: 'rgba(168, 85, 247, 0.7)', base: 5 }  // Morado
+        { div: 5, color: 'rgba(168, 85, 247, 0.7)', base: 5 }, // Morado
+        { div: 7, color: 'rgba(146, 64, 14, 0.7)', base: 7 }   // Café
     ];
 
     let snappedX = rect.x;

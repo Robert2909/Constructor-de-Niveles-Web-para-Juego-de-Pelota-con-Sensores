@@ -42,7 +42,8 @@ export const state = {
     rulerFamilies: {
         2: true,
         3: true,
-        5: true
+        5: true,
+        7: true
     },
     
     // Historial y Clipboard

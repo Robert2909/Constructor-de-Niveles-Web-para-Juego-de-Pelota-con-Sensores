@@ -2,6 +2,7 @@ import { state, saveState } from './state.js';
 import { getCanvasCoords, updateProperties, updateJSON, centerLevel, optimizeEntities, updateSelectionStats, checkSmartGuides, showOSD } from './utils.js';
 import { BASE_WIDTH, BASE_HEIGHT } from './constants.js';
 import { Entity } from './entities.js';
+import { toggleRulerFamily } from './rulers.js';
 
 export function initInputHandlers(canvas, renderFunc) {
     const ctx = canvas.getContext('2d');
@@ -394,6 +395,20 @@ export function initInputHandlers(canvas, renderFunc) {
 export function initKeyboardHandlers(renderFunc) {
     window.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        // Hotkeys de teclado para alternar familias de reglas (2-8)
+        if (!e.ctrlKey && !e.altKey && !e.metaKey && ['2', '3', '4', '5', '6', '7', '8'].includes(e.key)) {
+            let base = null;
+            if (e.key === '2' || e.key === '4' || e.key === '8') base = 2;
+            if (e.key === '3' || e.key === '6') base = 3;
+            if (e.key === '5') base = 5;
+            if (e.key === '7') base = 7;
+
+            if (base !== null) {
+                e.preventDefault();
+                toggleRulerFamily(base, renderFunc);
+            }
+        }
 
         if (e.key === 'Delete' || e.key === 'Backspace') {
             if (state.selectedIds.length > 0) {
