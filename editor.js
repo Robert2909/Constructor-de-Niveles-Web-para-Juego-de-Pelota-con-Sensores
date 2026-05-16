@@ -148,19 +148,7 @@ function updateZoomUI() {
 }
 
 document.getElementById('resetZoom')?.addEventListener('click', () => {
-    // Si ya estamos cerca del zoom de ajuste, forzamos el 100% real (1.0)
-    // Si no, ajustamos a la pantalla
-    const container = document.getElementById('canvas-container');
-    const fitZoom = Math.min(container.clientWidth / state.width, container.clientHeight / state.height) * 0.90;
-    
-    if (Math.abs(state.view.zoom - fitZoom) < 0.05) {
-        state.view.zoom = 1.0;
-        state.view.offsetX = (container.clientWidth - state.width) / 2;
-        state.view.offsetY = (container.clientHeight - state.height) / 2;
-    } else {
-        centerLevel(canvas);
-    }
-    
+    centerLevel(canvas);
     updateZoomUI();
     callRender();
 });

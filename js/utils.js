@@ -8,8 +8,8 @@ export function getCanvasCoords(e, canvas) {
     const y = (e.clientY - rect.top);
     
     return {
-        x: (x - state.view.offsetX) / state.view.zoom,
-        y: (y - state.view.offsetY) / state.view.zoom
+        x: (x - state.view.offsetX) / (state.view.zoom * state.view.baseZoom),
+        y: (y - state.view.offsetY) / (state.view.zoom * state.view.baseZoom)
     };
 }
 
@@ -20,21 +20,21 @@ export function centerLevel(canvas) {
     const cw = container.clientWidth;
     const ch = container.clientHeight;
     
-    // Calcular el zoom necesario para que todo el mapa (1920x1080) quepa en el contenedor
-    // Dejamos un pequeño margen del 10% para que no toque los bordes
+    // Calculamos el zoom que hace que el mapa quepa (con 10% de margen)
     const zoomX = cw / state.width;
     const zoomY = ch / state.height;
-    const fitZoom = Math.min(zoomX, zoomY) * 0.90;
+    state.view.baseZoom = Math.min(zoomX, zoomY) * 0.90;
     
-    state.view.zoom = Math.max(0.1, fitZoom);
+    // El zoom relativo del usuario vuelve a ser 1.0 (que visualmente se ve como "ajustado")
+    state.view.zoom = 1.0;
     
     // Centrar exactamente
-    state.view.offsetX = (cw - state.width * state.view.zoom) / 2;
-    state.view.offsetY = (ch - state.height * state.view.zoom) / 2;
+    state.view.offsetX = (cw - state.width * (state.view.zoom * state.view.baseZoom)) / 2;
+    state.view.offsetY = (ch - state.height * (state.view.zoom * state.view.baseZoom)) / 2;
     
-    // Actualizar la etiqueta de zoom en la UI si existe
+    // Actualizar la etiqueta de zoom (ahora dirá 100%)
     const label = document.getElementById('zoomLabel');
-    if (label) label.textContent = `${Math.round(state.view.zoom * 100)}%`;
+    if (label) label.textContent = `100%`;
 }
 
 export function updateJSON() {

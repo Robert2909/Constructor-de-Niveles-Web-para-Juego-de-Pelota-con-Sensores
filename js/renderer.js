@@ -6,16 +6,18 @@ export function render(canvas, ctx) {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    const totalZoom = state.view.zoom * state.view.baseZoom;
+
     ctx.save();
     ctx.translate(state.view.offsetX, state.view.offsetY);
-    ctx.scale(state.view.zoom, state.view.zoom);
+    ctx.scale(totalZoom, totalZoom);
 
     // 1. Fondo del Nivel (Límites reales)
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, state.width, state.height);
 
     // 2. Rejilla
-    drawGrid(ctx);
+    drawGrid(ctx, totalZoom);
 
     // 3. Entidades
     state.entities.forEach(en => {
@@ -24,11 +26,11 @@ export function render(canvas, ctx) {
         // Indicador de selección
         if (state.selectedIds.includes(en.id)) {
             ctx.strokeStyle = COLORS.selectionBorder;
-            ctx.lineWidth = 2 / state.view.zoom;
+            ctx.lineWidth = 2 / totalZoom;
             ctx.strokeRect(en.x, en.y, en.w, en.h);
 
             // Dibujar 8 manejadores de redimensionamiento
-            drawResizeHandles(ctx, en);
+            drawResizeHandles(ctx, en, totalZoom);
         }
     });
 
@@ -36,7 +38,7 @@ export function render(canvas, ctx) {
     if (state.isSelectingArea && state.currentTool === 'select') {
         ctx.fillStyle = COLORS.selection;
         ctx.strokeStyle = COLORS.selectionBorder;
-        ctx.lineWidth = 1 / state.view.zoom;
+        ctx.lineWidth = 1 / totalZoom;
         const { x1, y1, x2, y2 } = state.selectionBox;
         ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
         ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
@@ -51,7 +53,7 @@ export function render(canvas, ctx) {
 
         // Borde del preview
         ctx.strokeStyle = toolColor;
-        ctx.lineWidth = 2 / state.view.zoom;
+        ctx.lineWidth = 2 / totalZoom;
         ctx.globalAlpha = 0.8;
         ctx.strokeRect(state.tempRect.x, state.tempRect.y, state.tempRect.w, state.tempRect.h);
 
@@ -64,9 +66,9 @@ export function render(canvas, ctx) {
     // (Opcional, pero ayuda a ver dónde termina el nivel real)
 }
 
-function drawGrid(ctx) {
+function drawGrid(ctx, totalZoom) {
     ctx.strokeStyle = COLORS.grid;
-    ctx.lineWidth = 0.5 / state.view.zoom;
+    ctx.lineWidth = 0.5 / totalZoom;
     ctx.beginPath();
     
     // Líneas Verticales (Columnas)
@@ -82,8 +84,8 @@ function drawGrid(ctx) {
     ctx.stroke();
 }
 
-function drawResizeHandles(ctx, en) {
-    const size = 6 / state.view.zoom;
+function drawResizeHandles(ctx, en, totalZoom) {
+    const size = 6 / totalZoom;
     ctx.fillStyle = COLORS.selectionBorder;
     en.getHandleCoords().forEach(h => {
         ctx.fillRect(h.x - size / 2, h.y - size / 2, size, size);

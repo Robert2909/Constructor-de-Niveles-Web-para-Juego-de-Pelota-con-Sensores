@@ -6,6 +6,7 @@ export const state = {
     // Cámara
     view: {
         zoom: 1.0,
+        baseZoom: 1.0, // El zoom que hace que el mapa quepa perfecto
         offsetX: 0,
         offsetY: 0
     },
