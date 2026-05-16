@@ -21,11 +21,11 @@ export const state = {
     resizeHandle: null,
     tempRect: null,
     
-    // Configuración del Mundo Fijo (Aspect Ratio Estándar)
-    width: 960,
-    height: 540,
-    cols: 48,
-    rows: 27,
+    // Configuración del Mundo Fijo (Full HD Standard)
+    width: 1920,
+    height: 1080,
+    cols: 96,
+    rows: 54,
     
     // El tamaño de rejilla ahora es calculado
     get gridSizeX() { return this.width / this.cols; },
