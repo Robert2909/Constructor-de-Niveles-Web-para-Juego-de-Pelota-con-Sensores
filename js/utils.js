@@ -1,5 +1,6 @@
 import { state } from './state.js';
 import { BASE_WIDTH, BASE_HEIGHT } from './constants.js';
+import { Entity } from './entities.js';
 
 export function getCanvasCoords(e, canvas) {
     const rect = canvas.getBoundingClientRect();
@@ -171,39 +172,82 @@ export function transformSelection(action) {
 }
 
 export function optimizeEntities() {
-    if (state.entities.length < 2) return;
-    
+    if (state.entities.length === 0) return;
+
     const typesToOptimize = ['wall', 'hazard'];
-    let finalEntities = state.entities.filter(en => !typesToOptimize.includes(en.type));
+    let finalOptimized = [];
     
+    // 1. Separar no optimizables
+    let others = state.entities.filter(en => !typesToOptimize.includes(en.type));
+    let toProcess = state.entities.filter(en => typesToOptimize.includes(en.type));
+
     typesToOptimize.forEach(type => {
-        let group = state.entities.filter(en => en.type === type);
-        if (group.length === 0) return;
+        let items = toProcess.filter(en => en.type === type);
+        if (items.length === 0) return;
 
-        // Fusión Horizontal
-        group.sort((a, b) => a.y - b.y || a.x - b.x);
-        let hMerged = [];
-        group.forEach(en => {
-            let prev = hMerged[hMerged.length - 1];
-            if (prev && prev.y === en.y && prev.h === en.h && prev.x + prev.w === en.x) {
-                prev.w += en.w;
-            } else {
-                hMerged.push(en);
+        // Crear un mapa de celdas ocupadas para este tipo
+        // Usamos coordenadas de rejilla (indices) para facilitar la expansión
+        const sx = state.gridSizeX;
+        const sy = state.gridSizeY;
+        const grid = {}; // clave: "col,row"
+
+        items.forEach(en => {
+            const colStart = Math.round(en.x / sx);
+            const rowStart = Math.round(en.y / sy);
+            const colSpan = Math.round(en.w / sx);
+            const rowSpan = Math.round(en.h / sy);
+
+            for (let c = colStart; c < colStart + colSpan; c++) {
+                for (let r = rowStart; r < rowStart + rowSpan; r++) {
+                    grid[`${c},${r}`] = true;
+                }
             }
         });
 
-        // Fusión Vertical
-        hMerged.sort((a, b) => a.x - b.x || a.y - b.y);
-        let vMerged = [];
-        hMerged.forEach(en => {
-            let prev = vMerged[vMerged.length - 1];
-            if (prev && prev.x === en.x && prev.w === en.w && prev.y + prev.h === en.y) {
-                prev.h += en.h;
-            } else {
-                vMerged.push(en);
+        const visited = new Set();
+        const cols = state.cols;
+        const rows = state.rows;
+
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const key = `${c},${r}`;
+                if (grid[key] && !visited.has(key)) {
+                    // Encontramos el inicio de un posible rectángulo
+                    let width = 0;
+                    let height = 0;
+
+                    // 1. Expandir a la derecha todo lo posible
+                    while ((c + width) < cols && grid[`${c + width},${r}`] && !visited.has(`${c + width},${r}`)) {
+                        width++;
+                    }
+
+                    // 2. Expandir hacia abajo la tira completa
+                    let canExpandDown = true;
+                    while (canExpandDown && (r + height) < rows) {
+                        for (let i = 0; i < width; i++) {
+                            const downKey = `${c + i},${r + height}`;
+                            if (!grid[downKey] || visited.has(downKey)) {
+                                canExpandDown = false;
+                                break;
+                            }
+                        }
+                        if (canExpandDown) height++;
+                    }
+
+                    // Marcar celdas como visitadas
+                    for (let i = 0; i < width; i++) {
+                        for (let j = 0; j < height; j++) {
+                            visited.add(`${c + i},${r + j}`);
+                        }
+                    }
+
+                    // Crear la entidad optimizada
+                    finalOptimized.push(new Entity(type, c * sx, r * sy, width * sx, height * sy));
+                }
             }
-        });
-        finalEntities.push(...vMerged);
+        }
     });
-    state.entities = finalEntities;
+
+    state.entities = [...others, ...finalOptimized];
+    updateJSON();
 }

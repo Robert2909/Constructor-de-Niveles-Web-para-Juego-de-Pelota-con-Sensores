@@ -95,17 +95,18 @@ export function initInputHandlers(canvas, renderFunc) {
         if (state.isSelectingArea) {
             if (state.isBrushMode && state.currentTool !== 'select') {
                 // MODO PINCEL
-                const s = state.gridSize;
-                const px = Math.round(coords.x / s) * s;
-                const py = Math.round(coords.y / s) * s;
+                const sx = state.gridSizeX;
+                const sy = state.gridSizeY;
+                const px = Math.round(coords.x / sx) * sx;
+                const py = Math.round(coords.y / sy) * sy;
                 
                 // Evitar duplicados en el mismo punto para el mismo tipo
                 const exists = state.entities.find(en => 
-                    en.x === px && en.y === py && en.w === s && en.h === s && en.type === state.currentTool
+                    en.x === px && en.y === py && en.w === sx && en.h === sy && en.type === state.currentTool
                 );
                 
                 if (!exists) {
-                    state.entities.push(new Entity(state.currentTool, px, py, s, s));
+                    state.entities.push(new Entity(state.currentTool, px, py, sx, sy));
                     didBrushPaint = true;
                 }
             } else {
