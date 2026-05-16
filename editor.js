@@ -2,7 +2,7 @@ import { state, saveState } from './js/state.js';
 import { Entity } from './js/entities.js';
 import { render } from './js/renderer.js';
 import { initInputHandlers, initKeyboardHandlers } from './js/input-handler.js';
-import { centerLevel, updateProperties, updateJSON, transformSelection, scaleSelection, optimizeEntities, showOSD, bringSelectionToFront, sendSelectionToBack } from './js/utils.js';
+import { centerLevel, updateProperties, updateJSON, transformSelection, scaleSelection, optimizeEntities, showOSD, bringSelectionToFront, sendSelectionToBack, alignSelection, distributeSelection, getLevelJSON } from './js/utils.js';
 import { updateRulers } from './js/rulers.js';
 
 const canvas = document.getElementById('editorCanvas');
@@ -111,7 +111,7 @@ canvas.addEventListener('drop', (e) => {
 
 // Botones Maestros
 document.getElementById('btnExport')?.addEventListener('click', () => {
-    const data = document.getElementById('jsonOutput').value;
+    const data = getLevelJSON();
     const levelId = document.getElementById('levelIdInput').value;
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -124,6 +124,11 @@ document.getElementById('btnExport')?.addEventListener('click', () => {
 
 document.getElementById('btnOpenImport')?.addEventListener('click', () => {
     document.getElementById('modalImport').classList.remove('hidden');
+    const textarea = document.getElementById('txtImportJson');
+    if (textarea) {
+        textarea.value = '';
+        setTimeout(() => textarea.focus(), 50);
+    }
 });
 
 document.getElementById('btnCloseModal')?.addEventListener('click', () => {
@@ -143,6 +148,24 @@ document.getElementById('btnDoImport')?.addEventListener('click', () => {
             document.getElementById('modalImport').classList.add('hidden');
         }
     } catch (e) { alert('JSON inválido'); }
+});
+
+// Atajos de teclado para la modal de importación
+window.addEventListener('keydown', (e) => {
+    const modal = document.getElementById('modalImport');
+    if (modal && !modal.classList.contains('hidden')) {
+        if (e.key === 'Escape') {
+            modal.classList.add('hidden');
+            e.preventDefault();
+        }
+    }
+});
+
+document.getElementById('txtImportJson')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        document.getElementById('btnDoImport')?.click();
+    }
 });
 
 // Otros controles
@@ -169,14 +192,13 @@ document.getElementById('zoomOut')?.addEventListener('click', () => {
     callRender();
 });
 
-document.getElementById('btnCopy')?.addEventListener('click', () => {
-    const area = document.getElementById('jsonOutput');
-    if (area) {
-        area.select(); document.execCommand('copy');
-        const btn = document.getElementById('btnCopy');
-        btn.textContent = '¡Copiado!';
-        setTimeout(() => btn.textContent = 'COPIAR AL PORTAPAPELES', 2000);
-    }
+document.getElementById('btnCopyJSON')?.addEventListener('click', () => {
+    const data = getLevelJSON();
+    navigator.clipboard.writeText(data).then(() => {
+        showOSD('PORTAPAPELES', 'JSON de Nivel Copiado', '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>');
+    }).catch(err => {
+        console.error('Error al copiar: ', err);
+    });
 });
 
 ['propX', 'propY', 'propW', 'propH'].forEach(id => {
@@ -281,6 +303,41 @@ document.getElementById('bringToFront')?.addEventListener('click', () => {
 document.getElementById('sendToBack')?.addEventListener('click', () => {
     saveState();
     sendSelectionToBack();
+    updateProperties();
+    callRender();
+});
+
+// Alinear
+const alignMappings = {
+    'alignLeft': 'left',
+    'alignCenterX': 'centerX',
+    'alignRight': 'right',
+    'alignTop': 'top',
+    'alignCenterY': 'centerY',
+    'alignBottom': 'bottom'
+};
+
+Object.entries(alignMappings).forEach(([btnId, type]) => {
+    document.getElementById(btnId)?.addEventListener('click', () => {
+        if (state.selectedIds.length < 2) return;
+        saveState();
+        alignSelection(type);
+        updateProperties();
+        callRender();
+    });
+});
+
+// Distribución
+document.getElementById('distributeH')?.addEventListener('click', () => {
+    saveState();
+    distributeSelection('horizontal');
+    updateProperties();
+    callRender();
+});
+
+document.getElementById('distributeV')?.addEventListener('click', () => {
+    saveState();
+    distributeSelection('vertical');
     updateProperties();
     callRender();
 });

@@ -32,6 +32,9 @@
 .disabled-ui { pointer-events: none; opacity: 0.3; filter: grayscale(0.8); }
 
 .mode-toggle-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.mode-toggle-group.three-cols { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.mode-toggle-group.three-cols .mode-btn { padding: 8px 3px; font-size: 10px; gap: 4px; }
+.mode-toggle-group.three-cols .mode-btn span { font-size: 9px; font-weight: 600; letter-spacing: -0.2px; text-align: center; white-space: nowrap; }
 .mode-btn {
     background: var(--bg-light, #1a1a1a); border: 1px solid var(--border); border-radius: 8px;
     padding: 12px 8px; color: #888; cursor: pointer; display: flex;

@@ -77,8 +77,18 @@
             </div>
 
             <div class="top-actions">
-                <button id="btnOpenImport" class="btn-secondary">IMPORTAR</button>
-                <button id="btnExport" class="btn-primary">EXPORTAR JSON</button>
+                <button id="btnOpenImport" class="btn-secondary" style="gap: 6px; display: inline-flex; align-items: center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    IMPORTAR
+                </button>
+                <button id="btnCopyJSON" class="btn-secondary" style="gap: 6px; display: inline-flex; align-items: center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    COPIAR JSON
+                </button>
+                <button id="btnExport" class="btn-primary" style="gap: 6px; display: inline-flex; align-items: center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    EXPORTAR JSON
+                </button>
             </div>
         </header>
 
@@ -180,7 +190,7 @@
                 <div class="sidebar-header">
                     <h2>TRANSFORMACIONES</h2>
                 </div>
-                <div class="tool-section">
+                <div class="tool-section scrollable" style="flex: 1; min-height: 0;">
                     <div id="transform-panel" class="disabled-ui">
                         <div class="control-group-vertical">
                             <label>Ordenamiento</label>
@@ -224,6 +234,54 @@
                             </div>
                         </div>
 
+                        <div class="control-group-vertical">
+                            <label>Alinear</label>
+                            <div class="control-row-label" style="margin-top: 5px; font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px;">Vertical</div>
+                            <div class="mode-toggle-group three-cols" style="margin-top: 2px;">
+                                <button id="alignLeft" class="mode-btn" title="Alinear a la Izquierda">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M4 2v20"/><rect x="8" y="5" width="12" height="4" rx="1"/><rect x="8" y="15" width="8" height="4" rx="1"/></svg>
+                                    <span>Izquierda</span>
+                                </button>
+                                <button id="alignCenterX" class="mode-btn" title="Alinear al Centro Vertical">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M12 2v20"/><rect x="4" y="5" width="16" height="4" rx="1"/><rect x="6" y="15" width="12" height="4" rx="1"/></svg>
+                                    <span>Centro</span>
+                                </button>
+                                <button id="alignRight" class="mode-btn" title="Alinear a la Derecha">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M20 2v20"/><rect x="4" y="5" width="12" height="4" rx="1"/><rect x="8" y="15" width="8" height="4" rx="1"/></svg>
+                                    <span>Derecha</span>
+                                </button>
+                            </div>
+                            <div class="control-row-label" style="margin-top: 8px; font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px;">Horizontal</div>
+                            <div class="mode-toggle-group three-cols" style="margin-top: 2px;">
+                                <button id="alignTop" class="mode-btn" title="Alinear Arriba">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M2 4h20"/><rect x="5" y="8" width="4" height="12" rx="1"/><rect x="15" y="8" width="4" height="8" rx="1"/></svg>
+                                    <span>Arriba</span>
+                                </button>
+                                <button id="alignCenterY" class="mode-btn" title="Alinear al Medio Horizontal">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M2 12h20"/><rect x="5" y="4" width="4" height="16" rx="1"/><rect x="15" y="6" width="4" height="12" rx="1"/></svg>
+                                    <span>Centro</span>
+                                </button>
+                                <button id="alignBottom" class="mode-btn" title="Alinear Abajo">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M2 20h20"/><rect x="5" y="4" width="4" height="12" rx="1"/><rect x="15" y="8" width="4" height="8" rx="1"/></svg>
+                                    <span>Abajo</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="control-group-vertical">
+                            <label>Distribución</label>
+                            <div class="mode-toggle-group" style="margin-top: 5px;">
+                                <button id="distributeH" class="mode-btn" title="Distribuir Horizontalmente">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><rect x="2" y="5" width="4" height="14" rx="1"/><rect x="18" y="5" width="4" height="14" rx="1"/><path d="M12 2v22M7 12h10"/></svg>
+                                    <span>Horizontal</span>
+                                </button>
+                                <button id="distributeV" class="mode-btn" title="Distribuir Verticalmente">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><rect x="5" y="2" width="14" height="4" rx="1"/><rect x="5" y="18" width="14" height="4" rx="1"/><path d="M2 12h22M12 7v10"/></svg>
+                                    <span>Vertical</span>
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="control-group-vertical" style="margin-bottom: 0;">
                             <label>Escalar</label>
                             <div class="control-row" style="margin-top: 5px;">
@@ -242,13 +300,6 @@
                     </div>
                 </div>
 
-                <div class="sidebar-header" style="border-top: 1px solid var(--border);">
-                    <h2>JSON RESULTANTE</h2>
-                </div>
-                <div class="tool-section json-section">
-                    <textarea id="jsonOutput" readonly placeholder="El JSON aparecerá aquí..."></textarea>
-                    <button id="btnCopy" class="btn-small">COPIAR</button>
-                </div>
             </aside>
         </main>
     </div>
