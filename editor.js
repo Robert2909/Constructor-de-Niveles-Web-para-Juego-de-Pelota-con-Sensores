@@ -90,8 +90,8 @@ canvas.addEventListener('drop', (e) => {
     let w = Math.max(sx, 40);
     let h = Math.max(sy, 40);
     
-    // INICIO Y META: Siempre un solo bloque de grid
-    if (type === 'start' || type === 'goal') {
+    // INICIO: Siempre un solo bloque de grid
+    if (type === 'start') {
         w = sx;
         h = sy;
     }

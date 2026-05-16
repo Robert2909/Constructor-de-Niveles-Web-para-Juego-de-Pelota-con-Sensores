@@ -301,8 +301,8 @@ export function initInputHandlers(canvas, renderFunc) {
                 saveState();
                 let { x, y, w, h } = state.tempRect;
                 
-                // INICIO Y META: Siempre de un solo bloque (tamaño grid)
-                if (state.currentTool === 'start' || state.currentTool === 'goal') {
+                // INICIO: Siempre de un solo bloque (tamaño grid)
+                if (state.currentTool === 'start') {
                     w = state.gridSizeX;
                     h = state.gridSizeY;
                 }
