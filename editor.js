@@ -2,7 +2,7 @@ import { state, saveState } from './js/state.js';
 import { Entity } from './js/entities.js';
 import { render } from './js/renderer.js';
 import { initInputHandlers, initKeyboardHandlers } from './js/input-handler.js';
-import { centerLevel, updateProperties, updateJSON, transformSelection, scaleSelection, optimizeEntities, showOSD } from './js/utils.js';
+import { centerLevel, updateProperties, updateJSON, transformSelection, scaleSelection, optimizeEntities, showOSD, bringSelectionToFront, sendSelectionToBack } from './js/utils.js';
 import { updateRulers } from './js/rulers.js';
 
 const canvas = document.getElementById('editorCanvas');
@@ -269,6 +269,20 @@ document.getElementById('levelIdInput')?.addEventListener('input', updateJSON);
         updateProperties();
         callRender();
     });
+});
+
+document.getElementById('bringToFront')?.addEventListener('click', () => {
+    saveState();
+    bringSelectionToFront();
+    updateProperties();
+    callRender();
+});
+
+document.getElementById('sendToBack')?.addEventListener('click', () => {
+    saveState();
+    sendSelectionToBack();
+    updateProperties();
+    callRender();
 });
 
 document.getElementById('btnApplyScale')?.addEventListener('click', (e) => {

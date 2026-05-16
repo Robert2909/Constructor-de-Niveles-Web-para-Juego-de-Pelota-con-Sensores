@@ -478,4 +478,34 @@ export function showOSD(title, value, icon) {
     }, 1000);
 }
 
+export function bringSelectionToFront() {
+    if (state.selectedIds.length === 0) return;
+    const selected = [];
+    const unselected = [];
+    state.entities.forEach(en => {
+        if (state.selectedIds.includes(en.id)) {
+            selected.push(en);
+        } else {
+            unselected.push(en);
+        }
+    });
+    state.entities = [...unselected, ...selected];
+    updateJSON();
+}
+
+export function sendSelectionToBack() {
+    if (state.selectedIds.length === 0) return;
+    const selected = [];
+    const unselected = [];
+    state.entities.forEach(en => {
+        if (state.selectedIds.includes(en.id)) {
+            selected.push(en);
+        } else {
+            unselected.push(en);
+        }
+    });
+    state.entities = [...selected, ...unselected];
+    updateJSON();
+}
+
 
