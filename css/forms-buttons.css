@@ -1,0 +1,54 @@
+input[type="number"],
+input[type="text"],
+textarea {
+    background: #121212;
+    border: 1px solid var(--border);
+    padding: 8px;
+    border-radius: 4px;
+    color: var(--accent);
+    font-family: inherit;
+}
+
+.styled-input {
+    background: var(--bg-light, #1a1a1a);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    color: #fff;
+    width: 100%;
+    margin-top: 0;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+button {
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-primary { background: #ffffff; color: #121212; border: none; padding: 10px 24px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.btn-primary:hover { background: #e0e0e0; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
+
+.btn-secondary { background: transparent; color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 10px 20px; border-radius: 6px; }
+.btn-secondary:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.4); }
+
+.btn-small { background: var(--glass); color: var(--secondary); border: 1px solid var(--border); padding: 6px; border-radius: 4px; width: 100%; font-size: 10px; }
+
+.btn-danger { background: var(--danger); color: white; border: none; padding: 10px 20px; border-radius: 4px; }
+.btn-danger-alt {
+    width: 100%; background: rgba(229, 115, 115, 0.1); border: 1px solid rgba(229, 115, 115, 0.3);
+    color: #E57373; padding: 10px; border-radius: 8px; cursor: pointer; margin-top: 15px;
+    font-size: 11px; letter-spacing: 1px; font-weight: 600; transition: all 0.2s;
+}
+.btn-danger-alt:hover { background: #E57373; color: #fff; }
+
+.btn-delete {
+    width: 100%; padding: 10px; background: rgba(231, 76, 60, 0.1) !important;
+    border: 1px solid rgba(231, 76, 60, 0.3) !important; color: #e74c3c !important;
+    font-weight: 800; font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+    cursor: pointer; border-radius: 4px; margin-top: 10px;
+}
+.btn-delete:hover { background: #e74c3c !important; color: white !important; }

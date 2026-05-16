@@ -60,6 +60,43 @@ export function render(canvas, ctx) {
         ctx.globalAlpha = 1.0; // Resetear transparencia
     }
 
+    // 6. Guías de alineación inteligentes (Smart Guides)
+    state.activeGuides.x.forEach(guide => {
+        ctx.strokeStyle = guide.color;
+        ctx.lineWidth = 1 / totalZoom;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(guide.pos, 0);
+        ctx.lineTo(guide.pos, state.height);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Dibujar etiqueta de fracción cerca de la interacción
+        ctx.fillStyle = guide.color;
+        ctx.font = `bold ${14 / totalZoom}px Outfit`;
+        // Posicionar Y cerca del cursor pero con un offset
+        const labelY = state.lastInteractionPos.y - (30 / totalZoom);
+        ctx.fillText(guide.label, guide.pos + (5 / totalZoom), labelY);
+    });
+
+    state.activeGuides.y.forEach(guide => {
+        ctx.strokeStyle = guide.color;
+        ctx.lineWidth = 1 / totalZoom;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(0, guide.pos);
+        ctx.lineTo(state.width, guide.pos);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Dibujar etiqueta de fracción cerca de la interacción
+        ctx.fillStyle = guide.color;
+        ctx.font = `bold ${14 / totalZoom}px Outfit`;
+        // Posicionar X cerca del cursor
+        const labelX = state.lastInteractionPos.x + (20 / totalZoom);
+        ctx.fillText(guide.label, labelX, guide.pos - (5 / totalZoom));
+    });
+
     ctx.restore();
 
     // 6. Límites visuales del canvas (Overlay de zona muerta)

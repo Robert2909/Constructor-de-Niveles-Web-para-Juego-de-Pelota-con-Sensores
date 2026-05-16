@@ -1,5 +1,5 @@
 import { state, saveState } from './state.js';
-import { getCanvasCoords, updateProperties, updateJSON, centerLevel, optimizeEntities, updateSelectionStats } from './utils.js';
+import { getCanvasCoords, updateProperties, updateJSON, centerLevel, optimizeEntities, updateSelectionStats, checkSmartGuides } from './utils.js';
 import { BASE_WIDTH, BASE_HEIGHT } from './constants.js';
 import { Entity } from './entities.js';
 
@@ -122,12 +122,14 @@ export function initInputHandlers(canvas, renderFunc) {
                     const w = Math.abs(state.selectionBox.x2 - state.selectionBox.x1);
                     const h = Math.abs(state.selectionBox.y2 - state.selectionBox.y1);
                     
-                    state.tempRect = {
+                    const rect = {
                         x: Math.round(x / sx) * sx,
                         y: Math.round(y / sy) * sy,
                         w: Math.round(w / sx) * sx,
                         h: Math.round(h / sy) * sy
                     };
+                    const snapped = checkSmartGuides(rect);
+                    state.tempRect = { ...rect, x: snapped.x, y: snapped.y };
                     updateSelectionStats();
                 }
             }
@@ -162,11 +164,23 @@ export function initInputHandlers(canvas, renderFunc) {
                 let maxY = Math.max(...newPositions.map(p => p.y + p.h));
 
                 if (minX >= 0 && maxX <= state.width && minY >= 0 && maxY <= state.height) {
+                    // Calcular bounding box del grupo para las guías y magnetismo
+                    const groupRect = {
+                        x: minX, y: minY,
+                        w: maxX - minX, h: maxY - minY
+                    };
+                    const snapped = checkSmartGuides(groupRect);
+                    
+                    // Aplicar el desfase del magnetismo a todas las entidades del grupo
+                    const offsetX = snapped.x - minX;
+                    const offsetY = snapped.y - minY;
+
                     newPositions.forEach(pos => {
                         const en = selected.find(e => e.id === pos.id);
-                        en.x = pos.x;
-                        en.y = pos.y;
+                        en.x = pos.x + offsetX;
+                        en.y = pos.y + offsetY;
                     });
+
                     state.dragStart = coords;
                 }
             }
@@ -174,27 +188,55 @@ export function initInputHandlers(canvas, renderFunc) {
             renderFunc();
         }
 
-        if (state.isResizing) {
-            const en = state.entities.find(en => en.id === state.selectedIds[0]);
-            const sx = state.snapToGrid ? state.gridSizeX : 1;
-            const sy = state.snapToGrid ? state.gridSizeY : 1;
+        if (state.isResizing && state.selectedIds.length === 1) {
+            const en = state.entities.find(e => e.id === state.selectedIds[0]);
+            const sx = state.gridSizeX;
+            const sy = state.gridSizeY;
             const cx = Math.round(coords.x / sx) * sx;
             const cy = Math.round(coords.y / sy) * sy;
 
-            if (state.resizeHandle.includes('e')) en.w = Math.max(sx, Math.min(state.width - en.x, cx - en.x));
-            if (state.resizeHandle.includes('s')) en.h = Math.max(sy, Math.min(state.height - en.y, cy - en.y));
-            if (state.resizeHandle.includes('n')) {
-                const bottom = en.y + en.h;
-                const newY = Math.max(0, Math.min(bottom - sy, cy));
-                en.h = bottom - newY;
-                en.y = newY;
-            }
+            // Guardar bordes opuestos antes de modificar
+            const right = en.x + en.w;
+            const bottom = en.y + en.h;
+
+            if (state.resizeHandle.includes('e')) en.w = Math.max(sx, Math.round((cx - en.x) / sx) * sx);
+            if (state.resizeHandle.includes('s')) en.h = Math.max(sy, Math.round((cy - en.y) / sy) * sy);
+            
             if (state.resizeHandle.includes('w')) {
-                const right = en.x + en.w;
-                const newX = Math.max(0, Math.min(right - sx, cx));
-                en.w = right - newX;
+                const newX = Math.max(0, Math.min(right - sx, Math.round(cx / sx) * sx));
                 en.x = newX;
+                en.w = right - newX;
             }
+            if (state.resizeHandle.includes('n')) {
+                const newY = Math.max(0, Math.min(bottom - sy, Math.round(cy / sy) * sy));
+                en.y = newY;
+                en.h = bottom - newY;
+            }
+
+            // Aplicar Magnetismo (Snap to Guides)
+            const snapped = checkSmartGuides(en);
+            
+            // Ajustar según el tirador activo para no deformar o mover el lado equivocado
+            if (state.resizeHandle.includes('w')) {
+                en.x = snapped.x;
+                en.w = right - en.x;
+            } else if (state.resizeHandle.includes('e')) {
+                // Para el borde derecho, checkSmartGuides devuelve un snapped.x que haría que el borde derecho toque la guía
+                // si es que el borde derecho fue el que activó la guía.
+                // Sin embargo, para redimensionar el ancho, necesitamos calcular el nuevo ancho.
+                // f(x) = guidePos - en.x
+                const activeXGuide = state.activeGuides.x.find(g => Math.abs((en.x + en.w) - g.pos) < 15);
+                if (activeXGuide) en.w = activeXGuide.pos - en.x;
+            }
+
+            if (state.resizeHandle.includes('n')) {
+                en.y = snapped.y;
+                en.h = bottom - en.y;
+            } else if (state.resizeHandle.includes('s')) {
+                const activeYGuide = state.activeGuides.y.find(g => Math.abs((en.y + en.h) - g.pos) < 15);
+                if (activeYGuide) en.h = activeYGuide.pos - en.y;
+            }
+
             updateSelectionStats();
             renderFunc();
         }
@@ -278,6 +320,7 @@ export function initInputHandlers(canvas, renderFunc) {
         state.isSelectingArea = false;
         state.isPanning = false;
         state.tempRect = null;
+        state.activeGuides = { x: [], y: [] }; // Limpiar guías
         updateProperties();
         updateJSON();
         renderFunc();
@@ -402,6 +445,37 @@ export function initKeyboardHandlers(renderFunc) {
                 });
                 updateJSON(); renderFunc();
             }
+        }
+        // Ctrl + S: Alternar Snap
+        if (e.ctrlKey && e.key.toLowerCase() === 's') {
+            e.preventDefault();
+            state.snapToGrid = !state.snapToGrid;
+            
+            // Sincronizar visualmente usando el nuevo data-action
+            document.querySelectorAll('[data-action="snap"]').forEach(btn => {
+                const isBtnOn = btn.id === 'snapOn';
+                btn.classList.toggle('active', isBtnOn === state.snapToGrid);
+            });
+            
+            renderFunc();
+            return;
+        }
+
+        // Ctrl + D: Alternar entre Modo Bloque (Áreas) y Modo Pincel (Dibujo/Pintura)
+        if (e.ctrlKey && e.key.toLowerCase() === 'd') {
+            e.preventDefault();
+            
+            // 1. Cambiar el modo de dibujo, NO la herramienta
+            state.isBrushMode = !state.isBrushMode;
+            
+            // 2. Sincronizar visualmente los botones de modo superior
+            const currentMode = state.isBrushMode ? 'brush' : 'block';
+            document.querySelectorAll('[data-mode]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.mode === currentMode);
+            });
+            
+            renderFunc();
+            return;
         }
     });
 }

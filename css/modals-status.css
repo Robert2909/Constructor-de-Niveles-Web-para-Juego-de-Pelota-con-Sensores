@@ -1,0 +1,16 @@
+.modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.modal-content { background: var(--surface); padding: 32px; border-radius: 12px; width: 500px; border: 1px solid var(--border); }
+.modal-content h2 { margin-bottom: 16px; font-weight: 300; letter-spacing: 1px; }
+.modal-content p { color: var(--secondary); margin-bottom: 8px; font-size: 14px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
+
+#status-bar {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(10px); padding: 8px 18px;
+    border-radius: 25px; border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.7);
+    font-size: 11px; display: flex; align-items: center; gap: 12px; pointer-events: none;
+    z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+.divider { color: rgba(255, 255, 255, 0.2); font-weight: 200; }
+#selectionStats { display: flex; align-items: center; gap: 12px; color: rgba(255, 255, 255, 0.8); font-weight: 400; letter-spacing: 0.5px; }
+#coordInfo { font-family: 'Outfit', sans-serif; letter-spacing: 0.5px; }

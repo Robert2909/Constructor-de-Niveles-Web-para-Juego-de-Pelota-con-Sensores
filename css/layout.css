@@ -1,0 +1,31 @@
+main {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 280px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+}
+
+.sidebar.right {
+    border-left: 1px solid var(--border);
+    border-right: none;
+}
+
+.sidebar-header {
+    padding: 15px;
+    border-bottom: 1px solid var(--border);
+    background: #252525;
+}
+
+.sidebar-header h2 {
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: var(--text-main);
+}

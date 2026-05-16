@@ -1,0 +1,23 @@
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.hidden { display: none !important; }
+
+.empty-state {
+    text-align: center;
+    color: var(--secondary);
+    font-size: 14px;
+    padding: 40px 0;
+    font-style: italic;
+}

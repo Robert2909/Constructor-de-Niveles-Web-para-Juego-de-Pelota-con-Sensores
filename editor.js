@@ -2,13 +2,17 @@ import { state, saveState } from './js/state.js';
 import { Entity } from './js/entities.js';
 import { render } from './js/renderer.js';
 import { initInputHandlers, initKeyboardHandlers } from './js/input-handler.js';
-import { centerLevel, updateProperties, updateJSON, transformSelection } from './js/utils.js';
+import { centerLevel, updateProperties, updateJSON, transformSelection, scaleSelection, optimizeEntities } from './js/utils.js';
+import { updateRulers } from './js/rulers.js';
 
 const canvas = document.getElementById('editorCanvas');
 const ctx = canvas.getContext('2d');
 
 // --- WRAPPERS ---
-function callRender() { render(canvas, ctx); }
+function callRender() { 
+    render(canvas, ctx); 
+    updateRulers();
+}
 
 function undo() {
     if (state.undoStack.length > 0) {
@@ -256,10 +260,38 @@ document.getElementById('levelIdInput')?.addEventListener('input', updateJSON);
 // Transformaciones
 ['mirrorH', 'mirrorV', 'rotateL', 'rotateR'].forEach(action => {
     document.getElementById(action)?.addEventListener('click', () => {
+        saveState();
         transformSelection(action);
         updateProperties();
         callRender();
     });
+});
+
+document.getElementById('btnApplyScale')?.addEventListener('click', (e) => {
+    // 1. Capturar los valores actuales del DOM inmediatamente
+    const inputW = document.getElementById('targetScaleW');
+    const inputH = document.getElementById('targetScaleH');
+    
+    // Usamos parseFloat para ser más precisos si es necesario, aunque parseInt suele bastar
+    const w = parseInt(inputW.value);
+    const h = parseInt(inputH.value);
+
+    if (!isNaN(w) && !isNaN(h) && w > 0 && h > 0) {
+        state.isScaling = true;
+        
+        // 2. Quitar foco para limpiar la UI
+        if (document.activeElement instanceof HTMLInputElement) {
+            document.activeElement.blur();
+        }
+
+        saveState();
+        scaleSelection(w, h);
+        state.isScaling = false;
+        
+        // 3. Refrescar TODO para confirmar visualmente
+        updateProperties();
+        callRender();
+    }
 });
 
 // Eliminar desde el panel
@@ -290,14 +322,16 @@ initInputHandlers(canvas, callRender);
 initKeyboardHandlers(callRender);
 
 window.addEventListener('resize', () => {
-    canvas.width = document.getElementById('canvas-container').clientWidth;
-    canvas.height = document.getElementById('canvas-container').clientHeight;
+    const area = document.querySelector('.canvas-area');
+    canvas.width = area.clientWidth;
+    canvas.height = area.clientHeight;
     callRender();
 });
 
 // Arrancar
-canvas.width = document.getElementById('canvas-container').clientWidth;
-canvas.height = document.getElementById('canvas-container').clientHeight;
+const area = document.querySelector('.canvas-area');
+canvas.width = area.clientWidth;
+canvas.height = area.clientHeight;
 centerLevel(canvas);
 updateJSON();
 callRender();

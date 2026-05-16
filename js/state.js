@@ -16,11 +16,15 @@ export const state = {
     isResizing: false,
     isSelectingArea: false,
     isPanning: false,
+    isScaling: false,
     dragStart: { x: 0, y: 0 },
     panStart: { x: 0, y: 0 },
     selectionBox: { x1: 0, y1: 0, x2: 0, y2: 0 },
     resizeHandle: null,
     tempRect: null,
+    activeGuides: { x: [], y: [] }, // Guías de alineación activas
+    lastInteractionPos: { x: 0, y: 0 }, // Para posicionar etiquetas guía
+    lastSelectionKey: '', // Para rastrear cambios en la selección
     
     // Configuración del Mundo Fijo (Full HD Standard)
     width: 1920,

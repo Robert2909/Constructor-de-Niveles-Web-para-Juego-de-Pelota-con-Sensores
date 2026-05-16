@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LevelBuilder Web | Juego de Pelota</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/rulers.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 
@@ -19,6 +20,62 @@
                     <input type="number" id="levelIdInput" value="1" min="1">
                 </div>
             </div>
+            <!-- NUEVA BARRA DE HERRAMIENTAS CENTRAL -->
+            <div class="top-toolbar">
+                <!-- VISTA -->
+                <div class="toolbar-group">
+                    <div class="zoom-control-group compact">
+                        <button id="zoomOut" class="mode-btn small-btn" title="Alejar"><span>−</span></button>
+                        <button id="resetZoom" class="mode-btn active" title="Restablecer 1:1"><span
+                                id="zoomLabel">100%</span></button>
+                        <button id="zoomIn" class="mode-btn small-btn" title="Acercar"><span>+</span></button>
+                    </div>
+                    <span class="toolbar-tag">VISTA</span>
+                </div>
+
+                <div class="toolbar-divider"></div>
+
+                <!-- HERRAMIENTAS -->
+                <div class="toolbar-group">
+                    <div class="mode-toggle-group compact">
+                        <button id="modeBlock" class="mode-btn active" data-mode="block" title="Modo Bloques">
+                            <div class="icon-small block"></div>
+                        </button>
+                        <button id="modeBrush" class="mode-btn" data-mode="brush" title="Modo Pincel">
+                            <div class="icon-small brush"></div>
+                        </button>
+                    </div>
+                    <span class="toolbar-tag">HERRAMIENTAS</span>
+                </div>
+
+                <div class="toolbar-divider"></div>
+
+                <!-- REJILLA -->
+                <div class="toolbar-group">
+                    <div class="mode-toggle-group compact">
+                        <button id="snapOn" class="mode-btn active" data-action="snap" title="Magnetismo Activado">
+                            <div class="icon-small snap-on"></div>
+                        </button>
+                        <button id="snapOff" class="mode-btn" data-action="snap" title="Movimiento Libre">
+                            <div class="icon-small snap-off"></div>
+                        </button>
+                    </div>
+                    <span class="toolbar-tag">SNAP</span>
+                </div>
+
+                <div class="toolbar-divider"></div>
+
+                <!-- DENSIDAD -->
+                <div class="toolbar-group">
+                    <div class="grid-density-toolbar">
+                        <input type="number" id="gridCols" value="96" min="10" max="200" class="styled-input minimal">
+                        <span class="toolbar-label">×</span>
+                        <input type="number" id="gridRows" value="54" min="10" max="200" class="styled-input minimal">
+                    </div>
+                    <span class="toolbar-tag">REJILLA</span>
+                </div>
+            </div>
+
             <div class="top-actions">
                 <button id="btnOpenImport" class="btn-secondary">IMPORTAR</button>
                 <button id="btnExport" class="btn-primary">EXPORTAR JSON</button>
@@ -56,150 +113,127 @@
                     </div>
                 </div>
 
-                <div class="tool-section">
-                    <h3>VISTA</h3>
-                    <div class="control-group-vertical">
-                        <label>Nivel de Zoom</label>
-                        <div class="zoom-control-group">
-                            <button id="zoomOut" class="mode-btn small-btn" title="Alejar">
-                                <span>−</span>
-                            </button>
-                            <button id="resetZoom" class="mode-btn active" title="Restablecer 1:1">
-                                <span id="zoomLabel">100%</span>
-                            </button>
-                            <button id="zoomIn" class="mode-btn small-btn" title="Acercar">
-                                <span>+</span>
-                            </button>
-                        </div>
-                    </div>
+                <div class="sidebar-header" style="border-top: 1px solid var(--border);">
+                    <h2>PROPIEDADES</h2>
                 </div>
-
-                <div class="tool-section">
-                    <h3>OPCIONES</h3>
-
-                    <!-- 1. Modo de Construcción -->
-                    <div class="control-group-vertical">
-                        <label>Modo de Construcción</label>
-                        <div class="mode-toggle-group">
-                            <button id="modeBlock" class="mode-btn active" title="Modo Bloques">
-                                <div class="icon-small block"></div>
-                                <span>Bloques</span>
-                            </button>
-                            <button id="modeBrush" class="mode-btn" title="Modo Pincel">
-                                <div class="icon-small brush"></div>
-                                <span>Pincel</span>
-                            </button>
+                <div id="propertiesPanel" class="tool-section" style="border-bottom: none; overflow-y: auto;">
+                    <div id="selection-controls">
+                        <div class="control-group">
+                            <label>Tipo</label>
+                            <span id="propType" class="prop-val">---</span>
                         </div>
-                    </div>
-
-                    <!-- 2. Magnetismo -->
-                    <div class="control-group-vertical">
-                        <label>Ajuste de Rejilla</label>
-                        <div class="mode-toggle-group">
-                            <button id="snapOn" class="mode-btn active" title="Magnetismo Activado">
-                                <div class="icon-small snap-on"></div>
-                                <span>Magnetismo</span>
-                            </button>
-                            <button id="snapOff" class="mode-btn" title="Movimiento Libre">
-                                <div class="icon-small snap-off"></div>
-                                <span>Libre</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- 3. Configuración de Mundo -->
-                    <div class="control-group-vertical">
-                        <label>Densidad de Rejilla</label>
-                        <div class="grid-inputs">
-                            <div class="sub-group" style="grid-column: span 1.5;">
-                                <label>Columnas (X)</label>
-                                <input type="number" id="gridCols" value="96" min="10" max="200" class="styled-input">
+                        <div class="control-row" style="margin-top: 10px;">
+                            <div class="control-group">
+                                <label>X</label>
+                                <input type="text" id="propX" class="styled-input" value="---" disabled>
                             </div>
-                            <div class="sub-group" style="grid-column: span 1.5;">
-                                <label>Filas (Y)</label>
-                                <input type="number" id="gridRows" value="54" min="10" max="200" class="styled-input">
+                            <div class="control-group">
+                                <label>Y</label>
+                                <input type="text" id="propY" class="styled-input" value="---" disabled>
                             </div>
                         </div>
+                        <div class="control-row">
+                            <div class="control-group">
+                                <label>Ancho</label>
+                                <input type="text" id="propW" class="styled-input" value="---" disabled>
+                            </div>
+                            <div class="control-group">
+                                <label>Alto</label>
+                                <input type="text" id="propH" class="styled-input" value="---" disabled>
+                            </div>
+                        </div>
+                        <!-- Contenedor para propiedades específicas de entidades futuras -->
+                        <div id="extra-properties"></div>
+
+                        <button id="btnDelete" class="btn-delete" disabled>ELIMINAR OBJETO</button>
                     </div>
                 </div>
             </aside>
 
-            <main id="canvas-container">
-                <canvas id="editorCanvas"></canvas>
-                <div id="status-bar">
-                    <div id="coordInfo">X: 0, Y: 0</div>
-                    <div id="selectionStats" class="hidden">
-                        <span class="divider">|</span>
-                        <span id="statW">Ancho: 0 celdas</span>
-                        <span class="divider">|</span>
-                        <span id="statH">Alto: 0 celdas</span>
+            <main id="canvas-container" class="canvas-container">
+                <!-- Reglas Métricas -->
+                <div id="ruler-corner"></div>
+                <div id="ruler-h-container">
+                    <canvas id="rulerH" class="ruler-canvas"></canvas>
+                </div>
+                <div id="ruler-v-container">
+                    <canvas id="rulerV" class="ruler-canvas"></canvas>
+                </div>
+
+                <div class="canvas-area">
+                    <canvas id="editorCanvas"></canvas>
+                    <div id="status-bar">
+                        <div id="coordInfo">X: 0, Y: 0</div>
+                        <div id="selectionStats" class="hidden">
+                            <span class="divider">|</span>
+                            <span id="statW">Ancho: 0 celdas</span>
+                            <span class="divider">|</span>
+                            <span id="statH">Alto: 0 celdas</span>
+                        </div>
                     </div>
                 </div>
             </main>
 
             <aside class="sidebar right">
+
+
                 <div class="sidebar-header">
-                    <h2>PROPIEDADES</h2>
+                    <h2>TRANSFORMACIONES</h2>
                 </div>
-                <div id="propertiesPanel" class="tool-section">
-                    <div id="no-selection" class="info-msg">
-                        Selecciona un objeto para editar
-                    </div>
-                    <div id="selection-controls" class="hidden">
-                        <div class="control-group">
-                            <label>Tipo</label>
-                            <span id="propType" class="prop-val">Wall</span>
-                        </div>
-                        <div class="control-group">
-                            <label>X</label>
-                            <input type="number" id="propX" step="10">
-                        </div>
-                        <div class="control-group">
-                            <label>Y</label>
-                            <input type="number" id="propY" step="10">
-                        </div>
-                        <div class="control-group">
-                            <label>Ancho</label>
-                            <input type="number" id="propW" step="10">
-                        </div>
-                        <div class="control-group">
-                            <label>Alto</label>
-                            <input type="number" id="propH" step="10">
-                        </div>
-                        <button id="btnDelete" class="btn-danger-alt">ELIMINAR OBJETO</button>
-                    </div>
-                </div>
-
                 <div class="tool-section">
-                    <h3>TRANSFORMACIONES</h3>
                     <div id="transform-panel" class="disabled-ui">
-                        <div class="mode-toggle-group">
-                            <button id="mirrorH" class="mode-btn" title="Espejo Horizontal">
-                                <div class="icon-small mirror-h"></div>
-                                <span>Espejo H</span>
-                            </button>
-                            <button id="mirrorV" class="mode-btn" title="Espejo Vertical">
-                                <div class="icon-small mirror-v"></div>
-                                <span>Espejo V</span>
-                            </button>
+                        <div class="control-group-vertical">
+                            <label>Invertir</label>
+                            <div class="mode-toggle-group" style="margin-top: 5px;">
+                                <button id="mirrorH" class="mode-btn" title="Espejo Horizontal">
+                                    <div class="icon-small mirror-h"></div>
+                                    <span>Horizontal</span>
+                                </button>
+                                <button id="mirrorV" class="mode-btn" title="Espejo Vertical">
+                                    <div class="icon-small mirror-v"></div>
+                                    <span>Vertical</span>
+                                </button>
+                            </div>
                         </div>
-                        <div class="mode-toggle-group">
-                            <button id="rotateL" class="mode-btn" title="Rotar 90° Izquierda">
-                                <div class="icon-small rotate-l"></div>
-                                <span>Rotar -90°</span>
-                            </button>
-                            <button id="rotateR" class="mode-btn" title="Rotar 90° Derecha">
-                                <div class="icon-small rotate-r"></div>
-                                <span>Rotar +90°</span>
-                            </button>
+
+                        <div class="control-group-vertical">
+                            <label>Rotar</label>
+                            <div class="mode-toggle-group" style="margin-top: 5px;">
+                                <button id="rotateL" class="mode-btn" title="Rotar 90° Izquierda">
+                                    <div class="icon-small rotate-l"></div>
+                                    <span>-90°</span>
+                                </button>
+                                <button id="rotateR" class="mode-btn" title="Rotar 90° Derecha">
+                                    <div class="icon-small rotate-r"></div>
+                                    <span>+90°</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="control-group-vertical" style="margin-bottom: 0;">
+                            <label>Escalar</label>
+                            <div class="control-row" style="margin-top: 5px;">
+                                <div class="control-group">
+                                    <label>Ancho</label>
+                                    <input type="text" id="targetScaleW" class="styled-input" value="---" disabled>
+                                </div>
+                                <div class="control-group">
+                                    <label>Alto</label>
+                                    <input type="text" id="targetScaleH" class="styled-input" value="---" disabled>
+                                </div>
+                            </div>
+                            <button id="btnApplyScale" class="btn-small secondary-action"
+                                style="margin-top: 5px;">APLICAR ESCALA</button>
                         </div>
                     </div>
                 </div>
 
+                <div class="sidebar-header" style="border-top: 1px solid var(--border);">
+                    <h2>JSON RESULTANTE</h2>
+                </div>
                 <div class="tool-section json-section">
-                    <h3>JSON DE SALIDA</h3>
                     <textarea id="jsonOutput" readonly placeholder="El JSON aparecerá aquí..."></textarea>
-                    <button id="btnCopy" class="btn-small">COPIAR AL PORTAPAPELES</button>
+                    <button id="btnCopy" class="btn-small">COPIAR</button>
                 </div>
             </aside>
         </main>
