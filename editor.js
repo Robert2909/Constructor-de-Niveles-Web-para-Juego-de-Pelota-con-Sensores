@@ -131,9 +131,12 @@ document.getElementById('btnOpenImport')?.addEventListener('click', () => {
     }
 });
 
-document.getElementById('btnCloseModal')?.addEventListener('click', () => {
+const closeImportModal = () => {
     document.getElementById('modalImport').classList.add('hidden');
-});
+    document.getElementById('txtImportJson')?.blur();
+};
+
+document.getElementById('btnCloseModal')?.addEventListener('click', closeImportModal);
 
 document.getElementById('btnDoImport')?.addEventListener('click', () => {
     const json = document.getElementById('txtImportJson').value;
@@ -145,7 +148,7 @@ document.getElementById('btnDoImport')?.addEventListener('click', () => {
             if (data.levelId) document.getElementById('levelIdInput').value = data.levelId;
             state.selectedIds = [];
             updateProperties(); updateJSON(); callRender();
-            document.getElementById('modalImport').classList.add('hidden');
+            closeImportModal();
         }
     } catch (e) { alert('JSON inválido'); }
 });
@@ -155,7 +158,7 @@ window.addEventListener('keydown', (e) => {
     const modal = document.getElementById('modalImport');
     if (modal && !modal.classList.contains('hidden')) {
         if (e.key === 'Escape') {
-            modal.classList.add('hidden');
+            closeImportModal();
             e.preventDefault();
         }
     }
