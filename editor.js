@@ -14,7 +14,12 @@ function undo() {
     if (state.undoStack.length > 0) {
         state.redoStack.push(JSON.stringify(state.entities));
         const last = state.undoStack.pop();
-        state.entities = JSON.parse(last).map(e => new Entity(e.type, e.x, e.y, e.w, e.h));
+        const data = JSON.parse(last);
+        state.entities = data.map(e => {
+            const en = new Entity(e.type, e.x, e.y, e.w, e.h);
+            en.id = e.id; // Preservar el ID original para no romper selecciones
+            return en;
+        });
         state.selectedIds = [];
         updateProperties(); updateJSON(); callRender();
     }
@@ -24,7 +29,12 @@ function redo() {
     if (state.redoStack.length > 0) {
         state.undoStack.push(JSON.stringify(state.entities));
         const next = state.redoStack.pop();
-        state.entities = JSON.parse(next).map(e => new Entity(e.type, e.x, e.y, e.w, e.h));
+        const data = JSON.parse(next);
+        state.entities = data.map(e => {
+            const en = new Entity(e.type, e.x, e.y, e.w, e.h);
+            en.id = e.id;
+            return en;
+        });
         state.selectedIds = [];
         updateProperties(); updateJSON(); callRender();
     }
@@ -82,8 +92,8 @@ canvas.addEventListener('drop', (e) => {
         h = sy;
     }
 
-    const fx = Math.max(0, Math.min(800 - w, Math.round(rx / sx) * sx));
-    const fy = Math.max(0, Math.min(480 - h, Math.round(ry / sy) * sy));
+    const fx = Math.max(0, Math.min(state.width - w, Math.round(rx / sx) * sx));
+    const fy = Math.max(0, Math.min(state.height - h, Math.round(ry / sy) * sy));
 
     saveState();
     const news = new Entity(type, fx, fy, w, h);
@@ -166,13 +176,22 @@ document.getElementById('btnCopy')?.addEventListener('click', () => {
 });
 
 ['propX', 'propY', 'propW', 'propH'].forEach(id => {
-    document.getElementById(id)?.addEventListener('input', (e) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    
+    // Guardar estado al enfocar para capturar el valor ANTES del cambio
+    el.addEventListener('focus', () => saveState());
+    
+    el.addEventListener('input', (e) => {
         if (state.selectedIds.length === 1) {
             const en = state.entities.find(e => e.id === state.selectedIds[0]);
             const val = parseInt(e.target.value) || 0;
-            if (id === 'propX') en.x = val; if (id === 'propY') en.y = val;
-            if (id === 'propW') en.w = Math.max(1, val); if (id === 'propH') en.h = Math.max(1, val);
-            updateJSON(); callRender();
+            if (id === 'propX') en.x = val; 
+            if (id === 'propY') en.y = val;
+            if (id === 'propW') en.w = Math.max(1, val); 
+            if (id === 'propH') en.h = Math.max(1, val);
+            updateJSON(); 
+            callRender();
         }
     });
 });
@@ -256,9 +275,14 @@ document.getElementById('btnDelete')?.addEventListener('click', () => {
 
 // Escuchar Undo/Redo (Ctrl+Z / Ctrl+Y)
 window.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    if (e.ctrlKey && e.key === 'z') undo();
-    if (e.ctrlKey && e.key === 'y') redo();
+    if (e.ctrlKey && e.key === 'z') {
+        e.preventDefault();
+        undo();
+    }
+    if (e.ctrlKey && e.key === 'y') {
+        e.preventDefault();
+        redo();
+    }
 });
 
 // --- INICIALIZACIÓN ---
