@@ -203,18 +203,13 @@ document.getElementById('modeBrush')?.addEventListener('click', () => {
     document.getElementById('modeBlock').classList.remove('active');
 });
 
-document.getElementById('gridSize')?.addEventListener('input', e => {
-    state.gridSize = parseInt(e.target.value) || 20;
-    callRender();
-});
-
 document.getElementById('gridCols')?.addEventListener('input', e => {
-    state.cols = parseInt(e.target.value) || 40;
+    state.cols = parseInt(e.target.value) || 48;
     callRender();
 });
 
 document.getElementById('gridRows')?.addEventListener('input', e => {
-    state.rows = parseInt(e.target.value) || 24;
+    state.rows = parseInt(e.target.value) || 27;
     callRender();
 });
 

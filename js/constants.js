@@ -1,5 +1,5 @@
-export const BASE_WIDTH = 800;
-export const BASE_HEIGHT = 480;
+export const BASE_WIDTH = 960;
+export const BASE_HEIGHT = 540;
 
 export const COLORS = {
     wall: '#555555',

@@ -22,10 +22,10 @@ export const state = {
     tempRect: null,
     
     // Configuración del Mundo Fijo (Aspect Ratio Estándar)
-    width: 800,
-    height: 480,
-    cols: 40,
-    rows: 24,
+    width: 960,
+    height: 540,
+    cols: 48,
+    rows: 27,
     
     // El tamaño de rejilla ahora es calculado
     get gridSizeX() { return this.width / this.cols; },
