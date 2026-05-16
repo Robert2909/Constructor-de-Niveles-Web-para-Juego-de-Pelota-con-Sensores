@@ -87,6 +87,17 @@ export function updateSelectionStats() {
     const statH = document.getElementById('statH');
     if (!statsPanel || !statW || !statH) return;
 
+    // Prioridad 1: Si estamos dibujando algo nuevo (tempRect)
+    if (state.tempRect && state.tempRect.w > 0) {
+        statsPanel.classList.remove('hidden');
+        const blocksW = Math.round(state.tempRect.w / state.gridSizeX * 100) / 100;
+        const blocksH = Math.round(state.tempRect.h / state.gridSizeY * 100) / 100;
+        statW.textContent = `Anchura: ${blocksW} bloques`;
+        statH.textContent = `Altura: ${blocksH} bloques`;
+        return;
+    }
+
+    // Prioridad 2: Si hay elementos seleccionados
     if (state.selectedIds.length === 0) {
         statsPanel.classList.add('hidden');
         return;
@@ -94,10 +105,7 @@ export function updateSelectionStats() {
 
     statsPanel.classList.remove('hidden');
     
-    // 1. Obtener los elementos seleccionados
     const selected = state.entities.filter(en => state.selectedIds.includes(en.id));
-    
-    // 2. Calcular Bounding Box
     const minX = Math.min(...selected.map(en => en.x));
     const minY = Math.min(...selected.map(en => en.y));
     const maxX = Math.max(...selected.map(en => en.x + en.w));
@@ -106,8 +114,6 @@ export function updateSelectionStats() {
     const totalW = maxX - minX;
     const totalH = maxY - minY;
 
-    // 3. Convertir a bloques de grid
-    // Usamos Math.round para evitar decimales molestos por imprecisión de punto flotante
     const blocksW = Math.round(totalW / state.gridSizeX * 100) / 100;
     const blocksH = Math.round(totalH / state.gridSizeY * 100) / 100;
 

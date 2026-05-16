@@ -127,6 +127,7 @@ export function initInputHandlers(canvas, renderFunc) {
                         w: Math.round(w / sx) * sx,
                         h: Math.round(h / sy) * sy
                     };
+                    updateSelectionStats();
                 }
             }
             renderFunc();
