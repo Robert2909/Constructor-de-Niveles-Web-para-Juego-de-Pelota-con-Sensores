@@ -14,9 +14,27 @@ export function getCanvasCoords(e, canvas) {
 }
 
 export function centerLevel(canvas) {
-    state.view.zoom = 1.0;
-    state.view.offsetX = (canvas.width - BASE_WIDTH) / 2;
-    state.view.offsetY = (canvas.height - BASE_HEIGHT) / 2;
+    const container = document.getElementById('canvas-container');
+    if (!container) return;
+
+    const cw = container.clientWidth;
+    const ch = container.clientHeight;
+    
+    // Calcular el zoom necesario para que todo el mapa (1920x1080) quepa en el contenedor
+    // Dejamos un pequeño margen del 10% para que no toque los bordes
+    const zoomX = cw / state.width;
+    const zoomY = ch / state.height;
+    const fitZoom = Math.min(zoomX, zoomY) * 0.90;
+    
+    state.view.zoom = Math.max(0.1, fitZoom);
+    
+    // Centrar exactamente
+    state.view.offsetX = (cw - state.width * state.view.zoom) / 2;
+    state.view.offsetY = (ch - state.height * state.view.zoom) / 2;
+    
+    // Actualizar la etiqueta de zoom en la UI si existe
+    const label = document.getElementById('zoomLabel');
+    if (label) label.textContent = `${Math.round(state.view.zoom * 100)}%`;
 }
 
 export function updateJSON() {
