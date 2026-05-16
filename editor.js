@@ -3,7 +3,7 @@ import { Entity } from './js/entities.js';
 import { render } from './js/renderer.js';
 import { initInputHandlers, initKeyboardHandlers } from './js/input-handler.js';
 import { centerLevel, updateProperties, updateJSON, transformSelection, scaleSelection, optimizeEntities, showOSD, bringSelectionToFront, sendSelectionToBack, alignSelection, distributeSelection, getLevelJSON } from './js/utils.js';
-import { updateRulers } from './js/rulers.js';
+import { updateRulers, initRulerListeners } from './js/rulers.js';
 
 const canvas = document.getElementById('editorCanvas');
 const ctx = canvas.getContext('2d');
@@ -398,6 +398,7 @@ window.addEventListener('keydown', (e) => {
 // --- INICIALIZACIÓN ---
 initInputHandlers(canvas, callRender);
 initKeyboardHandlers(callRender);
+initRulerListeners(callRender);
 
 window.addEventListener('resize', () => {
     const area = document.querySelector('.canvas-area');

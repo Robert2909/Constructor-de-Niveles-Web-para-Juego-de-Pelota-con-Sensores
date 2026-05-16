@@ -382,6 +382,10 @@ export function optimizeEntities() {
     updateJSON();
 }
 
+function gcd(a, b) {
+    return b ? gcd(b, a % b) : a;
+}
+
 export function checkSmartGuides(rect) {
     state.activeGuides = { x: [], y: [] };
     if (!rect) return rect;
@@ -390,10 +394,12 @@ export function checkSmartGuides(rect) {
     const snapThreshold = 5; // Píxeles para magnetismo real (suavizado)
 
     const divisions = [
-        { div: 2, color: 'rgba(52, 152, 219, 0.7)' }, // Azul
-        { div: 3, color: 'rgba(46, 204, 113, 0.7)' }, // Verde
-        { div: 4, color: 'rgba(241, 196, 15, 0.7)' }, // Amarillo
-        { div: 5, color: 'rgba(231, 76, 60, 0.7)' }  // Rojo
+        { div: 2, color: 'rgba(59, 130, 246, 0.7)', base: 2 }, // Azul
+        { div: 3, color: 'rgba(234, 179, 8, 0.7)', base: 3 },  // Amarillo
+        { div: 6, color: 'rgba(234, 179, 8, 0.7)', base: 3 },  // Amarillo
+        { div: 4, color: 'rgba(239, 68, 68, 0.7)', base: 2 },  // Rojo
+        { div: 8, color: 'rgba(239, 68, 68, 0.7)', base: 2 },  // Rojo
+        { div: 5, color: 'rgba(168, 85, 247, 0.7)', base: 5 }  // Morado
     ];
 
     let snappedX = rect.x;
@@ -401,9 +407,14 @@ export function checkSmartGuides(rect) {
 
     const checkAxis = (val, axis, offset = 0) => {
         const totalSize = axis === 'x' ? state.width : state.height;
-        divisions.forEach(({ div, color }) => {
+        divisions.forEach(({ div, color, base }) => {
+            // Ignorar por completo si la familia correspondiente está desactivada
+            if (!state.rulerFamilies[base]) return;
+
             for (let i = 1; i < div; i++) {
-                if (div === 4 && i === 2) continue;
+                // Evitar duplicados de guías mediante el máximo común divisor
+                if (gcd(i, div) > 1) continue;
+
                 const guidePos = (totalSize / div) * i;
                 const diff = Math.abs(val - guidePos);
                 

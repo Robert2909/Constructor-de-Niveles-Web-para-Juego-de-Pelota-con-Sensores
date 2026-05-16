@@ -39,6 +39,11 @@ export const state = {
     // Opciones
     snapToGrid: true,
     isBrushMode: false,
+    rulerFamilies: {
+        2: true,
+        3: true,
+        5: true
+    },
     
     // Historial y Clipboard
     undoStack: [],
