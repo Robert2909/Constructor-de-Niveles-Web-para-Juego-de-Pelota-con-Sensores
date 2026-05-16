@@ -1,18 +1,18 @@
 import { state, saveState } from './state.js';
-import { getCanvasCoords, updateProperties, updateJSON, centerLevel, optimizeEntities, updateSelectionStats, checkSmartGuides } from './utils.js';
+import { getCanvasCoords, updateProperties, updateJSON, centerLevel, optimizeEntities, updateSelectionStats, checkSmartGuides, showOSD } from './utils.js';
 import { BASE_WIDTH, BASE_HEIGHT } from './constants.js';
 import { Entity } from './entities.js';
 
 export function initInputHandlers(canvas, renderFunc) {
     const ctx = canvas.getContext('2d');
-    
+
     // Variable para rastrear si se pintó algo en este trazo
     let didBrushPaint = false;
 
     canvas.addEventListener('mousedown', (e) => {
         const coords = getCanvasCoords(e, canvas);
         didBrushPaint = false;
-        
+
         if (e.button === 1) { // Click central (Pan)
             state.isPanning = true;
             state.panStart = { x: e.clientX, y: e.clientY };
@@ -35,7 +35,7 @@ export function initInputHandlers(canvas, renderFunc) {
         }
 
         // 1. SIEMPRE intentar seleccionar si clicamos una entidad (independiente de la herramienta)
-        const clicked = [...state.entities].reverse().find(en => 
+        const clicked = [...state.entities].reverse().find(en =>
             coords.x >= en.x && coords.x <= en.x + en.w &&
             coords.y >= en.y && coords.y <= en.y + en.h
         );
@@ -65,7 +65,7 @@ export function initInputHandlers(canvas, renderFunc) {
                 state.selectedIds = [];
                 state.isSelectingArea = true;
                 state.selectionBox = { x1: coords.x, y1: coords.y, x2: coords.x, y2: coords.y };
-                
+
                 if (state.isBrushMode) {
                     saveState();
                     const sx = state.gridSizeX;
@@ -99,12 +99,12 @@ export function initInputHandlers(canvas, renderFunc) {
                 const sy = state.gridSizeY;
                 const px = Math.round(coords.x / sx) * sx;
                 const py = Math.round(coords.y / sy) * sy;
-                
+
                 // Evitar duplicados en el mismo punto para el mismo tipo
-                const exists = state.entities.find(en => 
+                const exists = state.entities.find(en =>
                     en.x === px && en.y === py && en.w === sx && en.h === sy && en.type === state.currentTool
                 );
-                
+
                 if (!exists) {
                     state.entities.push(new Entity(state.currentTool, px, py, sx, sy));
                     didBrushPaint = true;
@@ -113,7 +113,7 @@ export function initInputHandlers(canvas, renderFunc) {
                 // MODO ÁREA
                 state.selectionBox.x2 = coords.x;
                 state.selectionBox.y2 = coords.y;
-                
+
                 if (state.currentTool !== 'select') {
                     const sx = state.snapToGrid ? state.gridSizeX : 1;
                     const sy = state.snapToGrid ? state.gridSizeY : 1;
@@ -121,7 +121,7 @@ export function initInputHandlers(canvas, renderFunc) {
                     const y = Math.min(state.selectionBox.y1, state.selectionBox.y2);
                     const w = Math.abs(state.selectionBox.x2 - state.selectionBox.x1);
                     const h = Math.abs(state.selectionBox.y2 - state.selectionBox.y1);
-                    
+
                     const rect = {
                         x: Math.round(x / sx) * sx,
                         y: Math.round(y / sy) * sy,
@@ -142,14 +142,14 @@ export function initInputHandlers(canvas, renderFunc) {
             const dy = coords.y - state.dragStart.y;
             const sx = state.snapToGrid ? state.gridSizeX : 1;
             const sy = state.snapToGrid ? state.gridSizeY : 1;
-            
+
             const stepX = Math.round(dx / sx) * sx;
             const stepY = Math.round(dy / sy) * sy;
 
             if (stepX !== 0 || stepY !== 0) {
                 const selected = state.entities.filter(en => state.selectedIds.includes(en.id));
                 const oldPositions = selected.map(en => ({ id: en.id, x: en.x, y: en.y }));
-                
+
                 let newPositions = selected.map(en => {
                     let nx = en.x + dx;
                     let ny = en.y + dy;
@@ -187,7 +187,7 @@ export function initInputHandlers(canvas, renderFunc) {
                     w: maxX - minX, h: maxY - minY
                 };
                 const snapped = checkSmartGuides(groupRect);
-                
+
                 let magOffsetX = snapped.x - minX;
                 let magOffsetY = snapped.y - minY;
 
@@ -201,7 +201,7 @@ export function initInputHandlers(canvas, renderFunc) {
                 newPositions.forEach(pos => {
                     const en = selected.find(e => e.id === pos.id);
                     const oldPos = oldPositions.find(e => e.id === pos.id);
-                    
+
                     en.x = pos.x + clampOffsetX + magOffsetX;
                     en.y = pos.y + clampOffsetY + magOffsetY;
 
@@ -239,7 +239,7 @@ export function initInputHandlers(canvas, renderFunc) {
                 if (en.y + newH > state.height) newH = state.height - en.y;
                 en.h = newH;
             }
-            
+
             if (state.resizeHandle.includes('w')) {
                 const newX = Math.max(0, Math.min(right - sx, Math.round(cx / sx) * sx));
                 en.x = newX;
@@ -253,7 +253,7 @@ export function initInputHandlers(canvas, renderFunc) {
 
             // Aplicar Magnetismo (Snap to Guides)
             const snapped = checkSmartGuides(en);
-            
+
             // Ajustar según el tirador activo para no deformar o mover el lado equivocado
             if (state.resizeHandle.includes('w')) {
                 en.x = snapped.x;
@@ -278,7 +278,7 @@ export function initInputHandlers(canvas, renderFunc) {
             updateSelectionStats();
             renderFunc();
         }
-        
+
         // Info de coordenadas
         const info = document.getElementById('coordInfo');
         if (info) info.textContent = `X: ${Math.round(coords.x)}, Y: ${Math.round(coords.y)}`;
@@ -288,10 +288,10 @@ export function initInputHandlers(canvas, renderFunc) {
             const en = state.entities.find(e => e.id === state.selectedIds[0]);
             const handles = en.getHandleCoords();
             const size = 10 / state.view.zoom;
-            const overHandle = handles.find(h => 
+            const overHandle = handles.find(h =>
                 Math.abs(coords.x - h.x) < size && Math.abs(coords.y - h.y) < size
             );
-            
+
             if (overHandle) {
                 const cursorMap = {
                     nw: 'nwse-resize', n: 'ns-resize', ne: 'nesw-resize',
@@ -320,11 +320,11 @@ export function initInputHandlers(canvas, renderFunc) {
 
                 state.entities.forEach(en => {
                     // CONDICIÓN ESTRICTA: Contenido al 100%
-                    const isContained = en.x >= r.x && 
-                                      en.x + en.w <= r.x + r.w && 
-                                      en.y >= r.y && 
-                                      en.y + en.h <= r.y + r.h;
-                    
+                    const isContained = en.x >= r.x &&
+                        en.x + en.w <= r.x + r.w &&
+                        en.y >= r.y &&
+                        en.y + en.h <= r.y + r.h;
+
                     if (isContained) {
                         newSelections.push(en.id);
                     }
@@ -338,21 +338,21 @@ export function initInputHandlers(canvas, renderFunc) {
             } else if (state.tempRect && state.tempRect.w > 0 && state.tempRect.h > 0) {
                 saveState();
                 let { x, y, w, h } = state.tempRect;
-                
+
                 // INICIO: Siempre de un solo bloque (tamaño grid)
                 if (state.currentTool === 'start') {
                     w = state.gridSizeX;
                     h = state.gridSizeY;
                 }
-                
+
                 state.entities.push(new Entity(state.currentTool, x, y, w, h));
             }
         }
-        
+
         if (didBrushPaint) {
             optimizeEntities();
         }
-        
+
         state.isDragging = false;
         state.isResizing = false;
         state.isSelectingArea = false;
@@ -368,16 +368,16 @@ export function initInputHandlers(canvas, renderFunc) {
         e.preventDefault();
         const coords = getCanvasCoords(e, canvas);
         const oldZoom = state.view.zoom;
-        
+
         if (e.ctrlKey) {
             // ZOOM HACIA EL CURSOR
             const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
             state.view.zoom = Math.min(Math.max(state.view.zoom * zoomFactor, 0.1), 5.0);
-            
+
             // Re-calcular offsets para mantener el cursor en el mismo sitio
             state.view.offsetX -= coords.x * (state.view.zoom - oldZoom);
             state.view.offsetY -= coords.y * (state.view.zoom - oldZoom);
-            
+
             const label = document.getElementById('zoomLabel');
             if (label) label.textContent = `Zoom: ${Math.round(state.view.zoom * 100)}%`;
         } else if (e.shiftKey) {
@@ -488,13 +488,14 @@ export function initKeyboardHandlers(renderFunc) {
         if (e.ctrlKey && e.key.toLowerCase() === 's') {
             e.preventDefault();
             state.snapToGrid = !state.snapToGrid;
-            
+
             // Sincronizar visualmente usando el nuevo data-action
             document.querySelectorAll('[data-action="snap"]').forEach(btn => {
                 const isBtnOn = btn.id === 'snapOn';
                 btn.classList.toggle('active', isBtnOn === state.snapToGrid);
             });
-            
+
+            showOSD('MODO DE MOVIMIENTO', state.snapToGrid ? 'Modo Rejilla' : 'Modo Libre', state.snapToGrid ? '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>' : '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>');
             renderFunc();
             return;
         }
@@ -502,16 +503,17 @@ export function initKeyboardHandlers(renderFunc) {
         // Ctrl + D: Alternar entre Modo Bloque (Áreas) y Modo Pincel (Dibujo/Pintura)
         if (e.ctrlKey && e.key.toLowerCase() === 'd') {
             e.preventDefault();
-            
+
             // 1. Cambiar el modo de dibujo, NO la herramienta
             state.isBrushMode = !state.isBrushMode;
-            
+
             // 2. Sincronizar visualmente los botones de modo superior
             const currentMode = state.isBrushMode ? 'brush' : 'block';
             document.querySelectorAll('[data-mode]').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.mode === currentMode);
             });
-            
+
+            showOSD('MODO DE CONSTRUCCIÓN', state.isBrushMode ? 'Modo Pincel' : 'Modo Bloque', state.isBrushMode ? '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>' : '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>');
             renderFunc();
             return;
         }

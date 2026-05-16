@@ -2,15 +2,15 @@ import { state, saveState } from './js/state.js';
 import { Entity } from './js/entities.js';
 import { render } from './js/renderer.js';
 import { initInputHandlers, initKeyboardHandlers } from './js/input-handler.js';
-import { centerLevel, updateProperties, updateJSON, transformSelection, scaleSelection, optimizeEntities } from './js/utils.js';
+import { centerLevel, updateProperties, updateJSON, transformSelection, scaleSelection, optimizeEntities, showOSD } from './js/utils.js';
 import { updateRulers } from './js/rulers.js';
 
 const canvas = document.getElementById('editorCanvas');
 const ctx = canvas.getContext('2d');
 
 // --- WRAPPERS ---
-function callRender() { 
-    render(canvas, ctx); 
+function callRender() {
+    render(canvas, ctx);
     updateRulers();
 }
 
@@ -78,18 +78,18 @@ canvas.addEventListener('drop', (e) => {
     const type = e.dataTransfer.getData('text/plain');
     const validTypes = ['wall', 'hazard', 'goal', 'start'];
     if (!validTypes.includes(type)) return;
-    
+
     // Usar la función de coordenadas del módulo para consistencia
     const rect = canvas.getBoundingClientRect();
     const rx = (e.clientX - rect.left - state.view.offsetX) / state.view.zoom;
     const ry = (e.clientY - rect.top - state.view.offsetY) / state.view.zoom;
-    
+
     const sx = state.snapToGrid ? state.gridSizeX : 1;
     const sy = state.snapToGrid ? state.gridSizeY : 1;
-    
+
     let w = Math.max(sx, 40);
     let h = Math.max(sy, 40);
-    
+
     // INICIO: Siempre un solo bloque de grid
     if (type === 'start') {
         w = sx;
@@ -103,9 +103,9 @@ canvas.addEventListener('drop', (e) => {
     const news = new Entity(type, fx, fy, w, h);
     state.entities.push(news);
     state.selectedIds = [news.id];
-    
-    updateProperties(); 
-    updateJSON(); 
+
+    updateProperties();
+    updateJSON();
     callRender();
 });
 
@@ -182,19 +182,19 @@ document.getElementById('btnCopy')?.addEventListener('click', () => {
 ['propX', 'propY', 'propW', 'propH'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    
+
     // Guardar estado al enfocar para capturar el valor ANTES del cambio
     el.addEventListener('focus', () => saveState());
-    
+
     el.addEventListener('input', (e) => {
         if (state.selectedIds.length === 1) {
             const en = state.entities.find(e => e.id === state.selectedIds[0]);
             const val = parseInt(e.target.value) || 0;
-            if (id === 'propX') en.x = val; 
+            if (id === 'propX') en.x = val;
             if (id === 'propY') en.y = val;
-            if (id === 'propW') en.w = Math.max(1, val); 
+            if (id === 'propW') en.w = Math.max(1, val);
             if (id === 'propH') en.h = Math.max(1, val);
-            updateJSON(); 
+            updateJSON();
             callRender();
         }
     });
@@ -204,6 +204,7 @@ document.getElementById('snapOn')?.addEventListener('click', () => {
     state.snapToGrid = true;
     document.getElementById('snapOn').classList.add('active');
     document.getElementById('snapOff').classList.remove('active');
+    showOSD('MODO DE MOVIMIENTO', 'Modo Rejilla', '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>');
     callRender();
 });
 
@@ -211,6 +212,7 @@ document.getElementById('snapOff')?.addEventListener('click', () => {
     state.snapToGrid = false;
     document.getElementById('snapOff').classList.add('active');
     document.getElementById('snapOn').classList.remove('active');
+    showOSD('MODO DE MOVIMIENTO', 'Modo Libre', '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>');
     callRender();
 });
 
@@ -218,12 +220,14 @@ document.getElementById('modeBlock')?.addEventListener('click', () => {
     state.isBrushMode = false;
     document.getElementById('modeBlock').classList.add('active');
     document.getElementById('modeBrush').classList.remove('active');
+    showOSD('MODO DE CONSTRUCCIÓN', 'Modo Bloque', '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>');
 });
 
 document.getElementById('modeBrush')?.addEventListener('click', () => {
     state.isBrushMode = true;
     document.getElementById('modeBrush').classList.add('active');
     document.getElementById('modeBlock').classList.remove('active');
+    showOSD('MODO DE CONSTRUCCIÓN', 'Modo Pincel', '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>');
 });
 
 document.getElementById('gridCols')?.addEventListener('input', e => {
@@ -242,14 +246,14 @@ document.getElementById('btnPerimeter')?.addEventListener('click', () => {
     const sy = state.gridSizeY;
     const w = state.width;
     const h = state.height;
-    
+
     const borders = [
         new Entity('hazard', 0, 0, w, sy), // Top
         new Entity('hazard', 0, h - sy, w, sy), // Bottom
         new Entity('hazard', 0, sy, sx, h - (sy * 2)), // Left
         new Entity('hazard', w - sx, sy, sx, h - (sy * 2)) // Right
     ];
-    
+
     state.entities.push(...borders);
     updateJSON();
     callRender();
@@ -271,14 +275,14 @@ document.getElementById('btnApplyScale')?.addEventListener('click', (e) => {
     // 1. Capturar los valores actuales del DOM inmediatamente
     const inputW = document.getElementById('targetScaleW');
     const inputH = document.getElementById('targetScaleH');
-    
+
     // Usamos parseFloat para ser más precisos si es necesario, aunque parseInt suele bastar
     const w = parseInt(inputW.value);
     const h = parseInt(inputH.value);
 
     if (!isNaN(w) && !isNaN(h) && w > 0 && h > 0) {
         state.isScaling = true;
-        
+
         // 2. Quitar foco para limpiar la UI
         if (document.activeElement instanceof HTMLInputElement) {
             document.activeElement.blur();
@@ -287,7 +291,7 @@ document.getElementById('btnApplyScale')?.addEventListener('click', (e) => {
         saveState();
         scaleSelection(w, h);
         state.isScaling = false;
-        
+
         // 3. Refrescar TODO para confirmar visualmente
         updateProperties();
         callRender();

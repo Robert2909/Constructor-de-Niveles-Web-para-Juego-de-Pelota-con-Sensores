@@ -443,3 +443,39 @@ export function checkSmartGuides(rect) {
     return { x: snappedX, y: snappedY };
 }
 
+export function showOSD(title, value, icon) {
+    let container = document.getElementById('osd-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'osd-container';
+        document.body.appendChild(container);
+    }
+    
+    // Limpiar OSDs anteriores para evitar acumulación
+    container.innerHTML = '';
+    
+    const toast = document.createElement('div');
+    toast.className = 'osd-toast';
+    toast.innerHTML = `
+        <div class="osd-icon">${icon}</div>
+        <div class="osd-title">${title}</div>
+        <div class="osd-value">${value}</div>
+    `;
+    
+    container.appendChild(toast);
+    
+    // Forzar reflow para animación
+    toast.offsetHeight;
+    
+    toast.classList.add('show');
+    
+    // Desaparecer después de 1 segundo
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            toast.remove();
+        }, 250);
+    }, 1000);
+}
+
+

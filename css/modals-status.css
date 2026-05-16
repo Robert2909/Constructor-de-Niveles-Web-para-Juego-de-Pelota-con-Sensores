@@ -14,3 +14,59 @@
 .divider { color: rgba(255, 255, 255, 0.2); font-weight: 200; }
 #selectionStats { display: flex; align-items: center; gap: 12px; color: rgba(255, 255, 255, 0.8); font-weight: 400; letter-spacing: 0.5px; }
 #coordInfo { font-family: 'Outfit', sans-serif; letter-spacing: 0.5px; }
+
+/* OSD Notification (Ghost Toast) */
+.osd-toast {
+    position: fixed;
+    bottom: 20%;
+    left: 50%;
+    transform: translate(-50%, 0) scale(0.9);
+    background: rgba(18, 18, 18, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    padding: 16px 28px;
+    border-radius: 14px;
+    font-family: 'Outfit', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.25s cubic-bezier(0.25, 1, 0.5, 1), transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.osd-toast.show {
+    opacity: 0.82;
+    transform: translate(-50%, 0) scale(1);
+}
+
+.osd-icon {
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.9;
+}
+
+.osd-title {
+    font-size: 9px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 2px;
+    font-weight: 700;
+}
+
+.osd-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    letter-spacing: 0.5px;
+}
+
+
