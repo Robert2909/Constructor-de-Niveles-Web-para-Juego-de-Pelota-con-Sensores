@@ -22,6 +22,23 @@ function undo() {
         state.entities = data.map(e => {
             const en = new Entity(e.type, e.x, e.y, e.w, e.h);
             en.id = e.id; // Preservar el ID original para no romper selecciones
+            if (e.portalId !== undefined) en.checkpointIndex = e.portalId;
+            else if (e.checkpointIndex !== undefined) en.checkpointIndex = e.checkpointIndex;
+            if (e.linkId !== undefined) en.linkId = e.linkId;
+            if (e.duration !== undefined) en.duration = e.duration;
+            if (e.dx !== undefined) en.dx = e.dx;
+            if (e.dy !== undefined) en.dy = e.dy;
+            if (e.speed !== undefined) en.speed = e.speed;
+            if (e.switchMode !== undefined) en.switchMode = e.switchMode;
+            if (e.gateType !== undefined) en.gateType = e.gateType;
+            if (e.inputLinkIds !== undefined) en.inputLinkIds = e.inputLinkIds;
+            if (e.outputLinkId !== undefined) en.outputLinkId = e.outputLinkId;
+            if (e.bossType !== undefined) en.bossType = e.bossType;
+            if (e.health !== undefined) en.health = e.health;
+            if (e.phases !== undefined) en.phases = e.phases;
+            if (e.attackDensity !== undefined) en.attackDensity = e.attackDensity;
+            if (e.attackFrequency !== undefined) en.attackFrequency = e.attackFrequency;
+            if (e.specialAttackFrequency !== undefined) en.specialAttackFrequency = e.specialAttackFrequency;
             return en;
         });
         state.selectedIds = [];
@@ -37,6 +54,23 @@ function redo() {
         state.entities = data.map(e => {
             const en = new Entity(e.type, e.x, e.y, e.w, e.h);
             en.id = e.id;
+            if (e.portalId !== undefined) en.checkpointIndex = e.portalId;
+            else if (e.checkpointIndex !== undefined) en.checkpointIndex = e.checkpointIndex;
+            if (e.linkId !== undefined) en.linkId = e.linkId;
+            if (e.duration !== undefined) en.duration = e.duration;
+            if (e.dx !== undefined) en.dx = e.dx;
+            if (e.dy !== undefined) en.dy = e.dy;
+            if (e.speed !== undefined) en.speed = e.speed;
+            if (e.switchMode !== undefined) en.switchMode = e.switchMode;
+            if (e.gateType !== undefined) en.gateType = e.gateType;
+            if (e.inputLinkIds !== undefined) en.inputLinkIds = e.inputLinkIds;
+            if (e.outputLinkId !== undefined) en.outputLinkId = e.outputLinkId;
+            if (e.bossType !== undefined) en.bossType = e.bossType;
+            if (e.health !== undefined) en.health = e.health;
+            if (e.phases !== undefined) en.phases = e.phases;
+            if (e.attackDensity !== undefined) en.attackDensity = e.attackDensity;
+            if (e.attackFrequency !== undefined) en.attackFrequency = e.attackFrequency;
+            if (e.specialAttackFrequency !== undefined) en.specialAttackFrequency = e.specialAttackFrequency;
             return en;
         });
         state.selectedIds = [];
@@ -76,7 +110,7 @@ canvas.addEventListener('dragover', e => e.preventDefault());
 canvas.addEventListener('drop', (e) => {
     e.preventDefault();
     const type = e.dataTransfer.getData('text/plain');
-    const validTypes = ['wall', 'hazard', 'goal', 'start'];
+    const validTypes = ['wall', 'hazard', 'checkpoint', 'switch', 'gate', 'goal', 'start', 'moving_wall', 'moving_hazard', 'spinning_hazard', 'logic_gate', 'wind_zone', 'speed_pad', 'boss'];
     if (!validTypes.includes(type)) return;
 
     // Usar la función de coordenadas del módulo para consistencia
@@ -122,6 +156,18 @@ document.getElementById('btnExport')?.addEventListener('click', () => {
     URL.revokeObjectURL(url);
 });
 
+document.getElementById('levelWidthInput')?.addEventListener('input', (e) => {
+    state.width = parseInt(e.target.value) || 1920;
+    updateJSON();
+    callRender();
+});
+
+document.getElementById('levelHeightInput')?.addEventListener('input', (e) => {
+    state.height = parseInt(e.target.value) || 1080;
+    updateJSON();
+    callRender();
+});
+
 document.getElementById('btnOpenImport')?.addEventListener('click', () => {
     document.getElementById('modalImport').classList.remove('hidden');
     const textarea = document.getElementById('txtImportJson');
@@ -144,13 +190,61 @@ document.getElementById('btnDoImport')?.addEventListener('click', () => {
         const data = JSON.parse(json);
         if (data.entities) {
             saveState();
-            state.entities = data.entities.map(e => new Entity(e.type, e.x, e.y, e.w, e.h));
+            state.entities = data.entities.map(e => {
+                const en = new Entity(e.type, e.x, e.y, e.w, e.h);
+                if (e.portalId !== undefined) en.checkpointIndex = e.portalId;
+                else if (e.checkpointIndex !== undefined) en.checkpointIndex = e.checkpointIndex;
+                if (e.linkId !== undefined) en.linkId = e.linkId;
+                if (e.duration !== undefined) en.duration = e.duration;
+                if (e.dx !== undefined) en.dx = e.dx;
+                if (e.dy !== undefined) en.dy = e.dy;
+                if (e.speed !== undefined) en.speed = e.speed;
+                if (e.switchMode !== undefined) en.switchMode = e.switchMode;
+                if (e.gateType !== undefined) en.gateType = e.gateType;
+                if (e.inputLinkIds !== undefined) en.inputLinkIds = e.inputLinkIds;
+                if (e.outputLinkId !== undefined) en.outputLinkId = e.outputLinkId;
+                if (e.bossType !== undefined) en.bossType = e.bossType;
+                if (e.health !== undefined) en.health = e.health;
+                if (e.phases !== undefined) en.phases = e.phases;
+                if (e.attackDensity !== undefined) en.attackDensity = e.attackDensity;
+                if (e.attackFrequency !== undefined) en.attackFrequency = e.attackFrequency;
+                if (e.specialAttackFrequency !== undefined) en.specialAttackFrequency = e.specialAttackFrequency;
+                return en;
+            });
             if (data.levelId) document.getElementById('levelIdInput').value = data.levelId;
+            
+            // Importar tema si existe
+            const themeInput = document.getElementById('themeInput');
+            if (themeInput) {
+                themeInput.value = data.theme || 'industrial';
+            }
+
+            // Importar dimensiones de nivel si existen
+            if (data.width) {
+                state.width = parseInt(data.width) || 1920;
+                const widthInput = document.getElementById('levelWidthInput');
+                if (widthInput) widthInput.value = state.width;
+            } else {
+                state.width = 1920;
+                const widthInput = document.getElementById('levelWidthInput');
+                if (widthInput) widthInput.value = 1920;
+            }
+            if (data.height) {
+                state.height = parseInt(data.height) || 1080;
+                const heightInput = document.getElementById('levelHeightInput');
+                if (heightInput) heightInput.value = state.height;
+            } else {
+                state.height = 1080;
+                const heightInput = document.getElementById('levelHeightInput');
+                if (heightInput) heightInput.value = 1080;
+            }
+
             state.selectedIds = [];
+            centerLevel(canvas);
             updateProperties(); updateJSON(); callRender();
             closeImportModal();
         }
-    } catch (e) { alert('JSON inválido'); }
+    } catch (e) { alert('JSON inválido: ' + e.message); }
 });
 
 // Atajos de teclado para la modal de importación
@@ -285,6 +379,9 @@ document.getElementById('btnPerimeter')?.addEventListener('click', () => {
 });
 
 document.getElementById('levelIdInput')?.addEventListener('input', updateJSON);
+document.getElementById('themeInput')?.addEventListener('change', () => {
+    callRender();
+});
 
 // Transformaciones
 ['mirrorH', 'mirrorV', 'rotateL', 'rotateR'].forEach(action => {
@@ -385,6 +482,7 @@ document.getElementById('btnDelete')?.addEventListener('click', () => {
 
 // Escuchar Undo/Redo (Ctrl+Z / Ctrl+Y)
 window.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     if (e.ctrlKey && e.key === 'z') {
         e.preventDefault();
         undo();
@@ -396,21 +494,58 @@ window.addEventListener('keydown', (e) => {
 });
 
 // --- INICIALIZACIÓN ---
-initInputHandlers(canvas, callRender);
-initKeyboardHandlers(callRender);
-initRulerListeners(callRender);
-
-window.addEventListener('resize', () => {
+async function init() {
+    initInputHandlers(canvas, callRender);
+    initKeyboardHandlers(callRender);
+    initRulerListeners(callRender);
+    
+    window.addEventListener('resize', () => {
+        const area = document.querySelector('.canvas-area');
+        canvas.width = area.clientWidth;
+        canvas.height = area.clientHeight;
+        callRender();
+    });
+    
     const area = document.querySelector('.canvas-area');
     canvas.width = area.clientWidth;
     canvas.height = area.clientHeight;
-    callRender();
-});
+    
+    try {
+        const saved = localStorage.getItem('levelEditorAutoSave');
+        if (saved) {
+            const data = JSON.parse(saved);
+            state.entities = data.map(e => {
+                const en = new Entity(e.type, e.x, e.y, e.w, e.h);
+                Object.assign(en, e);
+                return en;
+            });
+            console.log('Nivel restaurado desde memoria local.');
+        }
+    } catch(e) {}
+    
+    centerLevel(canvas);
+    
+    // Cargar temas centralizados de forma asíncrona
+    try {
+        const response = await fetch('themes.json');
+        if (response.ok) {
+            const data = await response.json();
+            // Sobrescribir los temas de estado reactivos con la configuración centralizada actualizada
+            state.themes = data;
+            console.log('Temas dinámicos cargados correctamente desde themes.json');
+        }
+    } catch (e) {
+        console.warn('Ejecución local o temas.json inaccesible. Usando base de temas de respaldo offline en state.js.');
+    }
+    
+    updateJSON();
+    
+    // Iniciar loop de animación continua para efectos visuales (cables de señales fluyendo, metas pulsando, etc.)
+    function animate() {
+        callRender();
+        requestAnimationFrame(animate);
+    }
+    animate();
+}
 
-// Arrancar
-const area = document.querySelector('.canvas-area');
-canvas.width = area.clientWidth;
-canvas.height = area.clientHeight;
-centerLevel(canvas);
-updateJSON();
-callRender();
+init();

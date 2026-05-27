@@ -1,6 +1,30 @@
 .tool-section { padding: 15px; border-bottom: 1px solid #333; flex-shrink: 0; }
 .tool-section.scrollable { overflow-y: auto; }
 
+/* Flexbox dinámico para el panel lateral izquierdo */
+.sidebar.left .tool-section.scrollable {
+    flex: 1 1 0% !important;
+    min-height: 80px !important;
+    overflow-y: auto !important;
+    scrollbar-gutter: stable !important;
+}
+
+/* Scrollbar ultrafina y elegante para que no reduzca el área útil ni desplace */
+.sidebar.left .tool-section.scrollable::-webkit-scrollbar {
+    width: 6px !important;
+}
+.sidebar.left .tool-section.scrollable::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+.sidebar.left .tool-section.scrollable::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-radius: 10px !important;
+    transition: background 0.2s;
+}
+.sidebar.left .tool-section.scrollable::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+}
+
 .control-row { display: flex; gap: 10px; margin-bottom: 10px; }
 .control-group { flex: 1; margin-bottom: 0; }
 .control-group label {
@@ -11,7 +35,14 @@
 .control-group-vertical { margin-bottom: 20px; }
 .control-group-vertical label { font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
 
-#propertiesPanel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+#propertiesPanel {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    display: flex;
+    flex-direction: column;
+}
 #selection-controls { display: flex; flex-direction: column; }
 
 .styled-input:disabled {

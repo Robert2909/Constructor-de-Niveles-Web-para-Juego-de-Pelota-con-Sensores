@@ -309,6 +309,16 @@ export function initInputHandlers(canvas, renderFunc) {
     });
 
     window.addEventListener('mouseup', (e) => {
+        // Evitar interferir si el click se soltó sobre un panel lateral, cabecera o elemento input
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.closest('.sidebar') || e.target.closest('header')) {
+            state.isDragging = false;
+            state.isResizing = false;
+            state.isSelectingArea = false;
+            state.isPanning = false;
+            state.tempRect = null;
+            return;
+        }
+
         if (state.isSelectingArea) {
             if (state.currentTool === 'select') {
                 const r = {
@@ -395,6 +405,15 @@ export function initInputHandlers(canvas, renderFunc) {
 export function initKeyboardHandlers(renderFunc) {
     window.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        
+        // Interceptar Hard Reset (Ctrl + Shift + R o Ctrl + F5 o Shift + F5)
+        if ((e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'r') || 
+            (e.ctrlKey && e.key === 'F5') || 
+            (e.shiftKey && e.key === 'F5')) {
+            localStorage.removeItem('levelEditorAutoSave');
+            console.log('Hard reset detectado. Memoria local borrada.');
+            return; // Permitir que el navegador proceda con la recarga
+        }
 
         // Hotkeys de teclado para alternar familias de reglas (2-8)
         if (!e.ctrlKey && !e.altKey && !e.metaKey && ['2', '3', '4', '5', '6', '7', '8'].includes(e.key)) {

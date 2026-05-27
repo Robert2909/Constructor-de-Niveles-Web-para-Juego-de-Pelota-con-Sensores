@@ -52,3 +52,39 @@ button {
     cursor: pointer; border-radius: 4px; margin-top: 10px;
 }
 .btn-delete:hover { background: #e74c3c !important; color: white !important; }
+
+/* Barras de desplazamiento (Scrollbars) premium */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #121212;
+}
+::-webkit-scrollbar-thumb {
+    background: #2a2a2a;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #64B5F6;
+}
+
+/* Spinner Arrows premium para inputs numéricos */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    background: #2a2a2a url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='24' viewBox='0 0 14 24'><path d='M7 4L3 9h8L7 4zm0 16l4-5H3l4 5z' fill='%23ffffff'/></svg>") no-repeat center;
+    border-radius: 4px;
+    height: 24px;
+    width: 14px;
+    border-left: 1px solid #121212;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+input[type="number"]::-webkit-inner-spin-button:hover,
+input[type="number"]::-webkit-outer-spin-button:hover {
+    background-color: #64B5F6;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='24' viewBox='0 0 14 24'><path d='M7 4L3 9h8L7 4zm0 16l4-5H3l4 5z' fill='%23121212'/></svg>");
+    opacity: 1;
+}
