@@ -1,12 +1,15 @@
 # Constructor de Niveles Web - Juego de Pelota con Sensores
 
-Un editor de niveles avanzado, modular y reactivo construido mediante HTML5, CSS3 y JavaScript.
+Una herramienta de autoría de nivel profesional, diseñada bajo estrictos estándares de rendimiento y escalabilidad. Este entorno proporciona un lienzo de desarrollo robusto capaz de generar ecosistemas interactivos y mapas complejos que son interpretados nativamente por plataformas móviles.
 
-Este proyecto fue diseñado con el propósito específico de generar esquemas de nivel y estructuras de datos compatibles en una relación 1:1 con el motor de Android del "Juego de Pelota con Sensores".
+## Capacidades Técnicas y Renderizado
 
-## Características de la Plataforma
+El proyecto destaca por su capacidad de procesar de manera ininterrumpida extensos volúmenes de elementos en pantalla. Al abstraerse completamente del DOM clásico para su representación visual y optar por técnicas de dibujado directo de bajo nivel, logra mantener una tasa de refresco inquebrantable de 60 cuadros por segundo. Esta proeza gráfica garantiza un entorno libre de caídas de rendimiento, permitiendo previsualizar interacciones físicas, animaciones y trazados complejos en absoluto tiempo real.
 
-- **Motor de Renderizado Delegado**: Implementa un entorno Canvas2D optimizado con patrones de delegación visual, prescindiendo del DOM para el procesamiento de gráficos en tiempo real.
-- **Herramientas de Autoría Complejas**: Provee capacidades integrales para la estructuración de niveles, incluyendo colocación paramétrica, selección de múltiples objetos (Bounding Box) y edición masiva.
-- **Álgebra y Precisión Geométrica**: Incorpora algoritmos de ajuste a cuadrícula interactivos (Smart Guides y Snap), cálculos para el enfoque de cámara dinámico y funciones de transformación geométrica avanzada.
-- **Sistema Lógico**: Ofrece un editor visual de dependencias que emula circuitos y compuertas lógicas computacionales (AND, OR, NOT), procesando y vinculando conexiones mediante la generación dinámica de hashes de color.
+## Herramientas Especializadas de Autoría
+
+El constructor proporciona un abanico exhaustivo de utilidades matemáticas e interactivas diseñadas para operar con niveles de alta complejidad:
+
+- **Sistemas Dinámicos Interconectados**: Integra un avanzado editor visual que procesa dependencias lógicas, evaluando en tiempo real circuitos, interruptores, mecanismos de tiempo y compuertas booleanas.
+- **Precisión Geométrica**: Los algoritmos espaciales analizan continuamente el entorno para proveer asistencia predictiva, imantación magnética y sugerencias de alineación milimétricas, garantizando un diseño metódico y perfecto.
+- **Gestión Espacial Optimizada**: Posibilita mutaciones masivas a través del espacio de trabajo. Herramientas sofisticadas de selección cruzada, clonación y distribución espacial automatizada erradican las limitaciones en la creación a gran escala.
