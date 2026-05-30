@@ -49,6 +49,8 @@ export function getLevelJSON() {
         theme: themeInput ? themeInput.value : 'industrial',
         width: state.width,
         height: state.height,
+        gridCols: state.cols,
+        gridRows: state.rows,
         entities: state.entities.map(en => {
             const out = {
                 type: en.type,
@@ -57,37 +59,24 @@ export function getLevelJSON() {
                 w: Math.round(en.w),
                 h: Math.round(en.h)
             };
-            if (en.type === 'portal') {
-                out.portalId = en.checkpointIndex;
-            } else if (en.checkpointIndex !== undefined) {
-                out.checkpointIndex = en.checkpointIndex;
+            
+            // Exportar dinámicamente cualquier propiedad extra (Evita tener que hardcodearlas)
+            for (const key in en) {
+                if (['type', 'x', 'y', 'w', 'h', 'id'].includes(key)) continue;
+                if (en[key] === undefined || en[key] === null || en[key] === '') continue; // Omitir vacíos
+                out[key] = en[key];
             }
-            if (en.linkId !== undefined && en.linkId !== '') out.linkId = en.linkId;
-            if (en.duration !== undefined && en.duration > 0) out.duration = en.duration;
-            if (en.dx !== undefined) out.dx = en.dx;
-            if (en.dy !== undefined) out.dy = en.dy;
-            if (en.speed !== undefined) out.speed = en.speed;
             
-            // Phase 3 Signal Bus & Logic Properties
-            if (en.switchMode !== undefined && en.switchMode !== '') out.switchMode = en.switchMode;
-            if (en.gateType !== undefined && en.gateType !== '') out.gateType = en.gateType;
-            if (en.inputLinkIds !== undefined && en.inputLinkIds !== '') out.inputLinkIds = en.inputLinkIds;
-            if (en.outputLinkId !== undefined && en.outputLinkId !== '') out.outputLinkId = en.outputLinkId;
-            
-            // Phase 4 Boss Parameters
-            if (en.type === 'boss') {
-                if (en.bossType !== undefined) out.bossType = en.bossType;
-                if (en.health !== undefined) out.health = en.health;
-                if (en.phases !== undefined) out.phases = en.phases;
-                if (en.attackDensity !== undefined) out.attackDensity = en.attackDensity;
-                if (en.attackFrequency !== undefined) out.attackFrequency = en.attackFrequency;
-                if (en.specialAttackFrequency !== undefined) out.specialAttackFrequency = en.specialAttackFrequency;
+            // Compatibilidad con portalId en exportación
+            if (out.checkpointIndex !== undefined && out.type === 'portal') {
+                out.portalId = out.checkpointIndex;
+                delete out.checkpointIndex;
             }
             
             return out;
         })
     };
-    return JSON.stringify(data, null, 2);
+    return JSON.stringify(data, null, 4);
 }
 
 export function updateProperties() {
@@ -441,6 +430,10 @@ export function updateProperties() {
                         <label>Señal de Daño (inputLinkId)</label>
                         <input type="text" id="propLinkId" class="styled-input" value="${en.linkId || ''}" placeholder="ID del interruptor/compuerta">
                         
+                        <label style="margin-top:10px; display:block;">Nombre del Jefe</label>
+                        <input type="text" id="propBossName" class="styled-input" value="${en.name || ''}" placeholder="Ej: Asmodeus">
+
+                        
                         <label style="margin-top:10px; display:block;">Estilo de Combate (Tipo)</label>
                         <select id="propBossType" class="styled-input">
                             <option value="scatter" ${en.bossType === 'scatter' ? 'selected' : ''}>Dispersor Caótico (Scatter)</option>
@@ -470,6 +463,10 @@ export function updateProperties() {
 
                     document.getElementById('propLinkId').addEventListener('input', (e) => {
                         en.linkId = e.target.value || '';
+                        updateJSON();
+                    });
+                    document.getElementById('propBossName').addEventListener('input', (e) => {
+                        en.name = e.target.value || '';
                         updateJSON();
                     });
                     document.getElementById('propBossType').addEventListener('change', (e) => {

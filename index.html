@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LevelBuilder Web | Juego de Pelota</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="css/rulers.css">
@@ -37,10 +37,36 @@
                     <span style="color: rgba(255,255,255,0.4); margin: 0 4px;">×</span>
                     <input type="number" id="levelHeightInput" value="1080" min="600" max="10000"
                         style="width: 70px; height: 32px; background: #1e1e1e; color: #ffffff; border: 1px solid #2a2a2a; border-radius: 4px; padding: 0 8px; font-family: inherit; font-size: 13px; outline: none; text-align: center;">
+                    <select id="presetDimensions"
+                        style="margin-left: 8px; height: 32px; background: #1e1e1e; color: #ffffff; border: 1px solid #2a2a2a; border-radius: 4px; padding: 0 8px; cursor: pointer; font-family: inherit; font-size: 13px; outline: none;">
+                        <option value="" disabled selected hidden>Presets</option>
+                        <option value="1920x1080">FHD (1920x1080)</option>
+                        <option value="3840x2160">4K (3840x2160)</option>
+                        <option value="3840x1080">Pasillo Largo (3840x1080)</option>
+                        <option value="1920x3240">Torre Alta (1920x3240)</option>
+                        <option value="1080x1920">Vertical (1080x1920)</option>
+                    </select>
                 </div>
             </div>
 
             <div class="top-actions">
+                <button id="btnClear" class="btn-secondary"
+                    style="gap: 6px; display: inline-flex; align-items: center; color: #ff6b6b; border-color: rgba(255,107,107,0.3);">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    LIMPIAR
+                </button>
+                <button id="btnSave" class="btn-secondary"
+                    style="gap: 6px; display: inline-flex; align-items: center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    GUARDAR
+                </button>
                 <button id="btnOpenImport" class="btn-secondary"
                     style="gap: 6px; display: inline-flex; align-items: center;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -272,6 +298,14 @@
                                 <input type="number" id="gridCols" value="96" min="10" max="200" class="styled-input minimal">
                                 <span class="toolbar-label">×</span>
                                 <input type="number" id="gridRows" value="54" min="10" max="200" class="styled-input minimal">
+                                <select id="presetGrids"
+                                    style="margin-left: 5px; height: 32px; background: #1e1e1e; color: #ffffff; border: 1px solid #2a2a2a; border-radius: 4px; padding: 0 8px; cursor: pointer; font-family: inherit; font-size: 13px; outline: none;">
+                                    <option value="" disabled selected hidden>Bloques</option>
+                                    <option value="20">20px (Fino)</option>
+                                    <option value="40">40px (Estándar)</option>
+                                    <option value="60">60px (Grande)</option>
+                                    <option value="120">120px (Gigante)</option>
+                                </select>
                             </div>
                             <span class="toolbar-tag">REJILLA</span>
                         </div>

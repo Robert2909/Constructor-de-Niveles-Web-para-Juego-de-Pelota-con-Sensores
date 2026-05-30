@@ -16,10 +16,45 @@ function callRender() {
 
 function undo() {
     if (state.undoStack.length > 0) {
-        state.redoStack.push(JSON.stringify(state.entities));
+        const levelInput = document.getElementById('levelIdInput');
+        const themeInput = document.getElementById('themeInput');
+
+        state.redoStack.push(JSON.stringify({
+            entities: state.entities,
+            width: state.width,
+            height: state.height,
+            levelId: levelInput ? levelInput.value : 1,
+            theme: themeInput ? themeInput.value : 'industrial'
+        }));
+
         const last = state.undoStack.pop();
         const data = JSON.parse(last);
-        state.entities = data.map(e => {
+
+        // Determinar si es formato antiguo (array) o nuevo (objeto completo)
+        let entitiesData = Array.isArray(data) ? data : data.entities;
+
+        if (!Array.isArray(data)) {
+            if (data.width !== undefined) {
+                state.width = data.width;
+                const wi = document.getElementById('levelWidthInput');
+                if (wi) wi.value = data.width;
+            }
+            if (data.height !== undefined) {
+                state.height = data.height;
+                const hi = document.getElementById('levelHeightInput');
+                if (hi) hi.value = data.height;
+            }
+            if (data.levelId !== undefined) {
+                const li = document.getElementById('levelIdInput');
+                if (li) li.value = data.levelId;
+            }
+            if (data.theme !== undefined) {
+                const ti = document.getElementById('themeInput');
+                if (ti) ti.value = data.theme;
+            }
+        }
+
+        state.entities = entitiesData.map(e => {
             const en = new Entity(e.type, e.x, e.y, e.w, e.h);
             en.id = e.id; // Preservar el ID original para no romper selecciones
             if (e.portalId !== undefined) en.checkpointIndex = e.portalId;
@@ -39,6 +74,7 @@ function undo() {
             if (e.attackDensity !== undefined) en.attackDensity = e.attackDensity;
             if (e.attackFrequency !== undefined) en.attackFrequency = e.attackFrequency;
             if (e.specialAttackFrequency !== undefined) en.specialAttackFrequency = e.specialAttackFrequency;
+            if (e.name !== undefined) en.name = e.name;
             return en;
         });
         state.selectedIds = [];
@@ -48,10 +84,44 @@ function undo() {
 
 function redo() {
     if (state.redoStack.length > 0) {
-        state.undoStack.push(JSON.stringify(state.entities));
+        const levelInput = document.getElementById('levelIdInput');
+        const themeInput = document.getElementById('themeInput');
+
+        state.undoStack.push(JSON.stringify({
+            entities: state.entities,
+            width: state.width,
+            height: state.height,
+            levelId: levelInput ? levelInput.value : 1,
+            theme: themeInput ? themeInput.value : 'industrial'
+        }));
+
         const next = state.redoStack.pop();
         const data = JSON.parse(next);
-        state.entities = data.map(e => {
+
+        let entitiesData = Array.isArray(data) ? data : data.entities;
+
+        if (!Array.isArray(data)) {
+            if (data.width !== undefined) {
+                state.width = data.width;
+                const wi = document.getElementById('levelWidthInput');
+                if (wi) wi.value = data.width;
+            }
+            if (data.height !== undefined) {
+                state.height = data.height;
+                const hi = document.getElementById('levelHeightInput');
+                if (hi) hi.value = data.height;
+            }
+            if (data.levelId !== undefined) {
+                const li = document.getElementById('levelIdInput');
+                if (li) li.value = data.levelId;
+            }
+            if (data.theme !== undefined) {
+                const ti = document.getElementById('themeInput');
+                if (ti) ti.value = data.theme;
+            }
+        }
+
+        state.entities = entitiesData.map(e => {
             const en = new Entity(e.type, e.x, e.y, e.w, e.h);
             en.id = e.id;
             if (e.portalId !== undefined) en.checkpointIndex = e.portalId;
@@ -71,6 +141,7 @@ function redo() {
             if (e.attackDensity !== undefined) en.attackDensity = e.attackDensity;
             if (e.attackFrequency !== undefined) en.attackFrequency = e.attackFrequency;
             if (e.specialAttackFrequency !== undefined) en.specialAttackFrequency = e.specialAttackFrequency;
+            if (e.name !== undefined) en.name = e.name;
             return en;
         });
         state.selectedIds = [];
@@ -144,9 +215,16 @@ canvas.addEventListener('drop', (e) => {
 });
 
 // Botones Maestros
+document.getElementById('btnCopyJSON')?.addEventListener('click', () => {
+    const data = getLevelJSON();
+    navigator.clipboard.writeText(data).then(() => {
+        showOSD('PORTAPAPELES', 'JSON de Nivel Copiado', '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>');
+    });
+});
+
 document.getElementById('btnExport')?.addEventListener('click', () => {
     const data = getLevelJSON();
-    const levelId = document.getElementById('levelIdInput').value;
+    const levelId = document.getElementById('levelIdInput').value || 1;
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -155,6 +233,49 @@ document.getElementById('btnExport')?.addEventListener('click', () => {
     a.click();
     URL.revokeObjectURL(url);
 });
+
+// NUEVO: Funcionalidad de Limpiar Entorno
+document.getElementById('btnClear')?.addEventListener('click', () => {
+    saveState();
+    state.entities = [];
+    state.selectedIds = [];
+
+    // Reset global properties
+    state.width = 1920;
+    state.height = 1080;
+
+    const levelInput = document.getElementById('levelIdInput');
+    if (levelInput) levelInput.value = 1;
+
+    const themeInput = document.getElementById('themeInput');
+    if (themeInput) themeInput.value = 'industrial';
+
+    const widthInput = document.getElementById('levelWidthInput');
+    if (widthInput) widthInput.value = 1920;
+
+    const heightInput = document.getElementById('levelHeightInput');
+    if (heightInput) heightInput.value = 1080;
+
+    updateJSON();
+    callRender();
+    showOSD('ENTORNO', 'Lienzo Limpiado (Ctrl+Z para deshacer)', '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>');
+});
+
+// NUEVO: Funcionalidad de Guardado Manual
+document.getElementById('btnSave')?.addEventListener('click', () => {
+    saveToLocalStorage();
+    showOSD('SISTEMA', 'Progreso Guardado', '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>');
+});
+
+function saveToLocalStorage() {
+    const data = getLevelJSON();
+    localStorage.setItem('levelBuilderSave', data);
+}
+
+// Auto-guardado cada 30 segundos
+setInterval(() => {
+    saveToLocalStorage();
+}, 30000);
 
 document.getElementById('levelWidthInput')?.addEventListener('input', (e) => {
     state.width = parseInt(e.target.value) || 1920;
@@ -168,7 +289,60 @@ document.getElementById('levelHeightInput')?.addEventListener('input', (e) => {
     callRender();
 });
 
-document.getElementById('btnOpenImport')?.addEventListener('click', () => {
+document.getElementById('presetDimensions')?.addEventListener('change', (e) => {
+    const val = e.target.value;
+    if (val) {
+        saveState();
+        const [w, h] = val.split('x').map(Number);
+        state.width = w;
+        state.height = h;
+        const wi = document.getElementById('levelWidthInput');
+        if (wi) wi.value = w;
+        const hi = document.getElementById('levelHeightInput');
+        if (hi) hi.value = h;
+        
+        updateJSON();
+        callRender();
+        e.target.value = ''; // Reset select
+    }
+});
+
+document.getElementById('presetGrids')?.addEventListener('change', (e) => {
+    const blockSize = parseInt(e.target.value);
+    if (blockSize) {
+        saveState();
+        // Calculamos las columnas y filas óptimas para encajar bloques de X píxeles
+        const cols = Math.max(1, Math.round(state.width / blockSize));
+        const rows = Math.max(1, Math.round(state.height / blockSize));
+        
+        state.cols = cols;
+        state.rows = rows;
+        const ci = document.getElementById('gridCols');
+        if (ci) ci.value = cols;
+        const ri = document.getElementById('gridRows');
+        if (ri) ri.value = rows;
+        
+        updateJSON();
+        callRender();
+        e.target.value = ''; // Reset select
+    }
+});
+
+document.getElementById('btnOpenImport')?.addEventListener('click', async () => {
+    try {
+        const text = await navigator.clipboard.readText();
+        const data = JSON.parse(text);
+        if (data && data.entities) {
+            const textarea = document.getElementById('txtImportJson');
+            if (textarea) textarea.value = text;
+            document.getElementById('btnDoImport')?.click();
+            return; // JSON válido detectado en portapapeles, fin de la ejecución
+        }
+    } catch (e) {
+        // Falla silenciosa si no hay texto, si el usuario no dio permiso o si el JSON es inválido
+    }
+
+    // Fallback: abrir modal manualmente
     document.getElementById('modalImport').classList.remove('hidden');
     const textarea = document.getElementById('txtImportJson');
     if (textarea) {
@@ -192,27 +366,20 @@ document.getElementById('btnDoImport')?.addEventListener('click', () => {
             saveState();
             state.entities = data.entities.map(e => {
                 const en = new Entity(e.type, e.x, e.y, e.w, e.h);
-                if (e.portalId !== undefined) en.checkpointIndex = e.portalId;
-                else if (e.checkpointIndex !== undefined) en.checkpointIndex = e.checkpointIndex;
-                if (e.linkId !== undefined) en.linkId = e.linkId;
-                if (e.duration !== undefined) en.duration = e.duration;
-                if (e.dx !== undefined) en.dx = e.dx;
-                if (e.dy !== undefined) en.dy = e.dy;
-                if (e.speed !== undefined) en.speed = e.speed;
-                if (e.switchMode !== undefined) en.switchMode = e.switchMode;
-                if (e.gateType !== undefined) en.gateType = e.gateType;
-                if (e.inputLinkIds !== undefined) en.inputLinkIds = e.inputLinkIds;
-                if (e.outputLinkId !== undefined) en.outputLinkId = e.outputLinkId;
-                if (e.bossType !== undefined) en.bossType = e.bossType;
-                if (e.health !== undefined) en.health = e.health;
-                if (e.phases !== undefined) en.phases = e.phases;
-                if (e.attackDensity !== undefined) en.attackDensity = e.attackDensity;
-                if (e.attackFrequency !== undefined) en.attackFrequency = e.attackFrequency;
-                if (e.specialAttackFrequency !== undefined) en.specialAttackFrequency = e.specialAttackFrequency;
+                // Copiar dinámicamente cualquier propiedad extra (Evita tener que hardcodearlas)
+                for (const key in e) {
+                    if (['type', 'x', 'y', 'w', 'h', 'id'].includes(key)) continue;
+                    en[key] = e[key];
+                }
+                // Compatibilidad con versiones anteriores para portalId
+                if (e.portalId !== undefined && e.type === 'portal') {
+                    en.checkpointIndex = e.portalId;
+                    delete en.portalId;
+                }
                 return en;
             });
             if (data.levelId) document.getElementById('levelIdInput').value = data.levelId;
-            
+
             // Importar tema si existe
             const themeInput = document.getElementById('themeInput');
             if (themeInput) {
@@ -239,12 +406,27 @@ document.getElementById('btnDoImport')?.addEventListener('click', () => {
                 if (heightInput) heightInput.value = 1080;
             }
 
+            // Importar rejilla si existe
+            if (data.gridCols) {
+                state.cols = parseInt(data.gridCols) || 96;
+                const ci = document.getElementById('gridCols');
+                if (ci) ci.value = state.cols;
+            }
+            if (data.gridRows) {
+                state.rows = parseInt(data.gridRows) || 54;
+                const ri = document.getElementById('gridRows');
+                if (ri) ri.value = state.rows;
+            }
+
             state.selectedIds = [];
             centerLevel(canvas);
             updateProperties(); updateJSON(); callRender();
             closeImportModal();
+            showOSD('SISTEMA', 'Nivel Importado Correctamente', '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>');
         }
-    } catch (e) { alert('JSON inválido: ' + e.message); }
+    } catch (e) {
+        showOSD('ERROR', 'JSON inválido', '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>');
+    }
 });
 
 // Atajos de teclado para la modal de importación
@@ -287,15 +469,6 @@ document.getElementById('zoomOut')?.addEventListener('click', () => {
     state.view.zoom = Math.max(state.view.zoom * 0.8, 0.1);
     updateZoomUI();
     callRender();
-});
-
-document.getElementById('btnCopyJSON')?.addEventListener('click', () => {
-    const data = getLevelJSON();
-    navigator.clipboard.writeText(data).then(() => {
-        showOSD('PORTAPAPELES', 'JSON de Nivel Copiado', '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>');
-    }).catch(err => {
-        console.error('Error al copiar: ', err);
-    });
 });
 
 ['propX', 'propY', 'propW', 'propH'].forEach(id => {
@@ -498,33 +671,72 @@ async function init() {
     initInputHandlers(canvas, callRender);
     initKeyboardHandlers(callRender);
     initRulerListeners(callRender);
-    
+
+    // Control + G para guardar manualmente
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && (e.key === 'g' || e.key === 'G')) {
+            e.preventDefault();
+            saveToLocalStorage();
+            showOSD('SISTEMA', 'Progreso Guardado', '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>');
+        }
+    });
+
     window.addEventListener('resize', () => {
         const area = document.querySelector('.canvas-area');
         canvas.width = area.clientWidth;
         canvas.height = area.clientHeight;
         callRender();
     });
-    
+
     const area = document.querySelector('.canvas-area');
     canvas.width = area.clientWidth;
     canvas.height = area.clientHeight;
-    
+
     try {
-        const saved = localStorage.getItem('levelEditorAutoSave');
-        if (saved) {
-            const data = JSON.parse(saved);
-            state.entities = data.map(e => {
-                const en = new Entity(e.type, e.x, e.y, e.w, e.h);
-                Object.assign(en, e);
-                return en;
-            });
+        const savedLevel = localStorage.getItem('levelBuilderSave');
+        if (savedLevel) {
+            const data = JSON.parse(savedLevel);
+            if (data.entities) {
+                state.entities = data.entities.map(e => {
+                    const en = new Entity(e.type, e.x, e.y, e.w, e.h);
+                    if (e.portalId !== undefined) en.checkpointIndex = e.portalId;
+                    else if (e.checkpointIndex !== undefined) en.checkpointIndex = e.checkpointIndex;
+                    if (e.linkId !== undefined) en.linkId = e.linkId;
+                    if (e.duration !== undefined) en.duration = e.duration;
+                    if (e.dx !== undefined) en.dx = e.dx;
+                    if (e.dy !== undefined) en.dy = e.dy;
+                    if (e.speed !== undefined) en.speed = e.speed;
+                    if (e.switchMode !== undefined) en.switchMode = e.switchMode;
+                    if (e.gateType !== undefined) en.gateType = e.gateType;
+                    if (e.inputLinkIds !== undefined) en.inputLinkIds = e.inputLinkIds;
+                    if (e.outputLinkId !== undefined) en.outputLinkId = e.outputLinkId;
+                    if (e.bossType !== undefined) en.bossType = e.bossType;
+                    if (e.health !== undefined) en.health = e.health;
+                    if (e.phases !== undefined) en.phases = e.phases;
+                    if (e.attackDensity !== undefined) en.attackDensity = e.attackDensity;
+                    if (e.attackFrequency !== undefined) en.attackFrequency = e.attackFrequency;
+                    if (e.specialAttackFrequency !== undefined) en.specialAttackFrequency = e.specialAttackFrequency;
+                    if (e.name !== undefined) en.name = e.name;
+                    return en;
+                });
+                if (data.levelId) document.getElementById('levelIdInput').value = data.levelId;
+                if (data.theme) document.getElementById('themeInput').value = data.theme;
+                if (data.width) {
+                    state.width = parseInt(data.width) || 1920;
+                    document.getElementById('levelWidthInput').value = state.width;
+                }
+                if (data.height) {
+                    state.height = parseInt(data.height) || 1080;
+                    document.getElementById('levelHeightInput').value = state.height;
+                }
+            }
             console.log('Nivel restaurado desde memoria local.');
+            showOSD('RECUPERADO', 'Progreso anterior restaurado', '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>');
         }
-    } catch(e) {}
-    
+    } catch (e) { }
+
     centerLevel(canvas);
-    
+
     // Cargar temas centralizados de forma asíncrona
     try {
         const response = await fetch('themes.json');
@@ -537,9 +749,9 @@ async function init() {
     } catch (e) {
         console.warn('Ejecución local o temas.json inaccesible. Usando base de temas de respaldo offline en state.js.');
     }
-    
+
     updateJSON();
-    
+
     // Iniciar loop de animación continua para efectos visuales (cables de señales fluyendo, metas pulsando, etc.)
     function animate() {
         callRender();

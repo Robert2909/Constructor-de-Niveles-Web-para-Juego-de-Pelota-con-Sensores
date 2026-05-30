@@ -5,6 +5,13 @@ import { Entity } from './entities.js';
 import { toggleRulerFamily } from './rulers.js';
 
 export function initInputHandlers(canvas, renderFunc) {
+    // Bloquear zoom nativo de navegador (Pinch/Ctrl+Scroll) en toda la página
+    window.addEventListener('wheel', (e) => {
+        if (e.ctrlKey) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
     const ctx = canvas.getContext('2d');
 
     // Variable para rastrear si se pintó algo en este trazo
@@ -284,7 +291,14 @@ export function initInputHandlers(canvas, renderFunc) {
 
         // Info de coordenadas
         const info = document.getElementById('coordInfo');
-        if (info) info.textContent = `X: ${Math.round(coords.x)}, Y: ${Math.round(coords.y)}`;
+        if (info) {
+            if (e.target === canvas) {
+                info.style.display = 'block';
+                info.textContent = `X: ${Math.round(coords.x)}, Y: ${Math.round(coords.y)}`;
+            } else {
+                info.style.display = 'none';
+            }
+        }
 
         // DETECCIÓN DE CURSOR PARA REDIMENSIONAMIENTO
         if (state.selectedIds.length === 1 && !state.isDragging && !state.isResizing && !state.isPanning) {
@@ -383,16 +397,17 @@ export function initInputHandlers(canvas, renderFunc) {
         const oldZoom = state.view.zoom;
 
         if (e.ctrlKey) {
-            // ZOOM HACIA EL CURSOR
-            const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+            // ZOOM HACIA EL CURSOR SUAVE
+            // Usamos Math.exp para que el trackpad sea súper fino y la rueda del ratón sea fluida
+            const zoomFactor = Math.exp(-e.deltaY * 0.0015);
             state.view.zoom = Math.min(Math.max(state.view.zoom * zoomFactor, 0.1), 5.0);
 
-            // Re-calcular offsets para mantener el cursor en el mismo sitio
-            state.view.offsetX -= coords.x * (state.view.zoom - oldZoom);
-            state.view.offsetY -= coords.y * (state.view.zoom - oldZoom);
+            // Re-calcular offsets para mantener el cursor exactamente en el mismo pixel de la pantalla
+            state.view.offsetX -= coords.x * state.view.baseZoom * (state.view.zoom - oldZoom);
+            state.view.offsetY -= coords.y * state.view.baseZoom * (state.view.zoom - oldZoom);
 
             const label = document.getElementById('zoomLabel');
-            if (label) label.textContent = `Zoom: ${Math.round(state.view.zoom * 100)}%`;
+            if (label) label.textContent = `${Math.round(state.view.zoom * 100)}%`;
         } else if (e.shiftKey) {
             state.view.offsetX -= e.deltaY * 0.5;
         } else {
@@ -404,6 +419,11 @@ export function initInputHandlers(canvas, renderFunc) {
 
 export function initKeyboardHandlers(renderFunc) {
     window.addEventListener('keydown', (e) => {
+        // Bloquear zoom nativo de navegador por teclado
+        if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '0' || e.key === '=')) {
+            e.preventDefault();
+        }
+
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
         
         // Interceptar Hard Reset (Ctrl + Shift + R o Ctrl + F5 o Shift + F5)

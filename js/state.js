@@ -133,15 +133,16 @@ export const state = {
 };
 
 export function saveState() {
-    state.undoStack.push(JSON.stringify(state.entities));
+    const levelInput = document.getElementById('levelIdInput');
+    const themeInput = document.getElementById('themeInput');
+    const snapObj = {
+        entities: state.entities,
+        width: state.width,
+        height: state.height,
+        levelId: levelInput ? levelInput.value : 1,
+        theme: themeInput ? themeInput.value : 'industrial'
+    };
+    state.undoStack.push(JSON.stringify(snapObj));
     state.redoStack = [];
     if (state.undoStack.length > 50) state.undoStack.shift();
-    
-    // Auto-save
-    try {
-        localStorage.setItem('levelEditorAutoSave', JSON.stringify(state.entities));
-    } catch(e) {}
 }
-
-// Nota: Las funciones de undo/redo se conectarán en el main para evitar referencias circulares
-// o se exportarán si son puras.

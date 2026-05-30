@@ -52,22 +52,10 @@ export class Entity {
 
     clone(offset = 0) {
         const c = new Entity(this.type, this.x + offset, this.y + offset, this.w, this.h);
-        if (this.checkpointIndex !== undefined) c.checkpointIndex = this.checkpointIndex;
-        if (this.linkId !== undefined) c.linkId = this.linkId;
-        if (this.duration !== undefined) c.duration = this.duration;
-        if (this.dx !== undefined) c.dx = this.dx;
-        if (this.dy !== undefined) c.dy = this.dy;
-        if (this.speed !== undefined) c.speed = this.speed;
-        if (this.switchMode !== undefined) c.switchMode = this.switchMode;
-        if (this.gateType !== undefined) c.gateType = this.gateType;
-        if (this.inputLinkIds !== undefined) c.inputLinkIds = this.inputLinkIds;
-        if (this.outputLinkId !== undefined) c.outputLinkId = this.outputLinkId;
-        if (this.bossType !== undefined) c.bossType = this.bossType;
-        if (this.health !== undefined) c.health = this.health;
-        if (this.phases !== undefined) c.phases = this.phases;
-        if (this.attackDensity !== undefined) c.attackDensity = this.attackDensity;
-        if (this.attackFrequency !== undefined) c.attackFrequency = this.attackFrequency;
-        if (this.specialAttackFrequency !== undefined) c.specialAttackFrequency = this.specialAttackFrequency;
+        for (const key in this) {
+            if (['type', 'x', 'y', 'w', 'h', 'id'].includes(key)) continue;
+            c[key] = this[key];
+        }
         return c;
     }
 
