@@ -32,12 +32,12 @@ export function updateProperties() {
             if (extraPanel) {
                 extraPanel.innerHTML = ''; // Limpiar previo
 
-                if (en.type === 'checkpoint') {
+                                if (en.type === 'checkpoint') {
                     const group = document.createElement('div');
                     group.className = 'control-group';
                     group.style.marginTop = '10px';
                     group.innerHTML = `
-                        <label>Índice del Checkpoint (Orden)</label>
+                        <label>Índice (Orden)</label>
                         <input type="number" step="1" id="propCpIndex" class="styled-input" value="${en.checkpointIndex !== undefined ? en.checkpointIndex : 0}">
                     `;
                     extraPanel.appendChild(group);
@@ -65,7 +65,7 @@ export function updateProperties() {
                     group.className = 'control-group';
                     group.style.marginTop = '10px';
                     group.innerHTML = `
-                        <label>Canal de Salida (outputLinkId)</label>
+                        <label>Canal de Salida</label>
                         <input type="text" id="propLinkId" class="styled-input" value="${en.linkId || ''}">
                     `;
                     extraPanel.appendChild(group);
@@ -79,23 +79,20 @@ export function updateProperties() {
                         updateJSON();
                     });
                 } else if (en.type === 'gate') {
-                    const group1 = document.createElement('div');
-                    group1.className = 'control-group';
-                    group1.style.marginTop = '10px';
-                    group1.innerHTML = `
-                        <label>Canal de Entrada (inputLinkId)</label>
-                        <input type="text" id="propLinkId" class="styled-input" value="${en.linkId || ''}">
+                    const row = document.createElement('div');
+                    row.className = 'control-row';
+                    row.style.marginTop = '10px';
+                    row.innerHTML = `
+                        <div class="control-group">
+                            <label>Entrada (Link)</label>
+                            <input type="text" id="propLinkId" class="styled-input" value="${en.linkId || ''}">
+                        </div>
+                        <div class="control-group">
+                            <label>Duración (0=perm)</label>
+                            <input type="number" step="0.1" id="propDuration" class="styled-input" value="${en.duration !== undefined ? en.duration : 0}">
+                        </div>
                     `;
-                    extraPanel.appendChild(group1);
-
-                    const group2 = document.createElement('div');
-                    group2.className = 'control-group';
-                    group2.style.marginTop = '10px';
-                    group2.innerHTML = `
-                        <label>Duración Apertura (segs, 0 = perm.)</label>
-                        <input type="number" step="0.1" id="propDuration" class="styled-input" value="${en.duration !== undefined ? en.duration : 0}">
-                    `;
-                    extraPanel.appendChild(group2);
+                    extraPanel.appendChild(row);
 
                     document.getElementById('propLinkId').addEventListener('input', (e) => {
                         en.linkId = e.target.value || '';
@@ -106,41 +103,35 @@ export function updateProperties() {
                         updateJSON();
                     });
                 } else if (en.type === 'moving_wall' || en.type === 'moving_hazard') {
-                    const groupLink = document.createElement('div');
-                    groupLink.className = 'control-group';
-                    groupLink.style.marginTop = '10px';
-                    groupLink.innerHTML = `
-                        <label>Canal de Activación (opcional)</label>
-                        <input type="text" id="propLinkId" class="styled-input" value="${en.linkId || ''}" placeholder="Siempre activo">
+                    const row1 = document.createElement('div');
+                    row1.className = 'control-row';
+                    row1.style.marginTop = '10px';
+                    row1.innerHTML = `
+                        <div class="control-group">
+                            <label>Despl. X (dx)</label>
+                            <input type="number" step="10" id="propDX" class="styled-input" value="${en.dx !== undefined ? en.dx : 0}">
+                        </div>
+                        <div class="control-group">
+                            <label>Despl. Y (dy)</label>
+                            <input type="number" step="10" id="propDY" class="styled-input" value="${en.dy !== undefined ? en.dy : 0}">
+                        </div>
                     `;
-                    extraPanel.appendChild(groupLink);
-
-                    const groupDX = document.createElement('div');
-                    groupDX.className = 'control-group';
-                    groupDX.style.marginTop = '10px';
-                    groupDX.innerHTML = `
-                        <label>Desplazamiento X (dx)</label>
-                        <input type="number" step="10" id="propDX" class="styled-input" value="${en.dx !== undefined ? en.dx : 0}">
+                    extraPanel.appendChild(row1);
+                    
+                    const row2 = document.createElement('div');
+                    row2.className = 'control-row';
+                    row2.style.marginTop = '10px';
+                    row2.innerHTML = `
+                        <div class="control-group">
+                            <label>Ciclo (segs)</label>
+                            <input type="number" step="0.1" id="propSpeed" class="styled-input" value="${en.speed !== undefined ? en.speed : 2.0}">
+                        </div>
+                        <div class="control-group">
+                            <label>Activación (Link)</label>
+                            <input type="text" id="propLinkId" class="styled-input" value="${en.linkId || ''}">
+                        </div>
                     `;
-                    extraPanel.appendChild(groupDX);
-
-                    const groupDY = document.createElement('div');
-                    groupDY.className = 'control-group';
-                    groupDY.style.marginTop = '10px';
-                    groupDY.innerHTML = `
-                        <label>Desplazamiento Y (dy)</label>
-                        <input type="number" step="10" id="propDY" class="styled-input" value="${en.dy !== undefined ? en.dy : 0}">
-                    `;
-                    extraPanel.appendChild(groupDY);
-
-                    const groupSpeed = document.createElement('div');
-                    groupSpeed.className = 'control-group';
-                    groupSpeed.style.marginTop = '10px';
-                    groupSpeed.innerHTML = `
-                        <label>Duración Ciclo (segs)</label>
-                        <input type="number" step="0.1" id="propSpeed" class="styled-input" value="${en.speed !== undefined ? en.speed : 2.0}">
-                    `;
-                    extraPanel.appendChild(groupSpeed);
+                    extraPanel.appendChild(row2);
 
                     document.getElementById('propDX').addEventListener('input', (e) => {
                         en.dx = parseFloat(e.target.value) || 0;
@@ -159,7 +150,6 @@ export function updateProperties() {
                         updateJSON();
                     });
                 } else if (en.type === 'logic_gate') {
-                    // Auto-sanitizar NOT al seleccionar para que no cargue múltiples entradas accidentales
                     if (en.gateType === 'NOT' && en.inputLinkIds && en.inputLinkIds.includes(',')) {
                         en.inputLinkIds = en.inputLinkIds.split(',')[0].trim();
                     }
@@ -170,31 +160,28 @@ export function updateProperties() {
                     groupGateType.innerHTML = `
                         <label>Operación Lógica</label>
                         <select id="propGateType" class="styled-input" style="padding: 4px; border-radius: 4px; background: #252525; color: white; border: 1px solid #444; width: 100%;">
-                            <option value="AND" ${en.gateType === 'AND' ? 'selected' : ''}>AND (Todos activos)</option>
+                            <option value="AND" ${en.gateType === 'AND' ? 'selected' : ''}>AND (Todos)</option>
                             <option value="OR" ${en.gateType === 'OR' ? 'selected' : ''}>OR (Al menos uno)</option>
                             <option value="NOT" ${en.gateType === 'NOT' ? 'selected' : ''}>NOT (Inversor)</option>
                         </select>
                     `;
                     extraPanel.appendChild(groupGateType);
 
-                    const groupInputs = document.createElement('div');
-                    groupInputs.className = 'control-group';
-                    groupInputs.style.marginTop = '10px';
-                    const inputsLabel = en.gateType === 'NOT' ? 'Canal de Entrada (Inversor NOT)' : 'Canales de Entrada (Ej: A, B)';
-                    groupInputs.innerHTML = `
-                        <label>${inputsLabel}</label>
-                        <input type="text" id="propInputLinkIds" class="styled-input" value="${en.inputLinkIds || ''}">
+                    const rowInputs = document.createElement('div');
+                    rowInputs.className = 'control-row';
+                    rowInputs.style.marginTop = '10px';
+                    const inputsLabel = en.gateType === 'NOT' ? 'Entrada (Link)' : 'Entradas (Links)';
+                    rowInputs.innerHTML = `
+                        <div class="control-group">
+                            <label id="labelInputLinks">${inputsLabel}</label>
+                            <input type="text" id="propInputLinkIds" class="styled-input" value="${en.inputLinkIds || ''}">
+                        </div>
+                        <div class="control-group">
+                            <label>Salida (Link)</label>
+                            <input type="text" id="propOutputLinkId" class="styled-input" value="${en.outputLinkId || ''}">
+                        </div>
                     `;
-                    extraPanel.appendChild(groupInputs);
-
-                    const groupOutput = document.createElement('div');
-                    groupOutput.className = 'control-group';
-                    groupOutput.style.marginTop = '10px';
-                    groupOutput.innerHTML = `
-                        <label>Canal de Salida (outputLinkId)</label>
-                        <input type="text" id="propOutputLinkId" class="styled-input" value="${en.outputLinkId || ''}">
-                    `;
-                    extraPanel.appendChild(groupOutput);
+                    extraPanel.appendChild(rowInputs);
 
                     document.getElementById('propGateType').addEventListener('change', (e) => {
                         en.gateType = e.target.value;
@@ -205,29 +192,21 @@ export function updateProperties() {
                             const inputField = document.getElementById('propInputLinkIds');
                             if (inputField) {
                                 inputField.value = en.inputLinkIds || '';
-                                const label = inputField.previousElementSibling;
-                                if (label) {
-                                    label.textContent = 'Canal de Entrada (Inversor NOT)';
-                                }
+                                document.getElementById('labelInputLinks').textContent = 'Entrada (Link)';
                             }
                         } else {
                             const inputField = document.getElementById('propInputLinkIds');
                             if (inputField) {
-                                const label = inputField.previousElementSibling;
-                                if (label) {
-                                    label.textContent = 'Canales de Entrada (Ej: A, B)';
-                                }
+                                document.getElementById('labelInputLinks').textContent = 'Entradas (Links)';
                             }
                         }
                         updateJSON();
                     });
                     document.getElementById('propInputLinkIds').addEventListener('input', (e) => {
                         let val = e.target.value || '';
-                        if (en.gateType === 'NOT') {
-                            if (val.includes(',')) {
-                                val = val.split(',')[0].trim();
-                                e.target.value = val;
-                            }
+                        if (en.gateType === 'NOT' && val.includes(',')) {
+                            val = val.split(',')[0].trim();
+                            e.target.value = val;
                         }
                         en.inputLinkIds = val;
                         updateJSON();
@@ -237,77 +216,54 @@ export function updateProperties() {
                         updateJSON();
                     });
                 } else if (en.type === 'wind_zone') {
-                    const groupFX = document.createElement('div');
-                    groupFX.className = 'control-group';
-                    groupFX.style.marginTop = '10px';
-                    groupFX.innerHTML = `
-                        <label>Fuerza X (Fuerza constante en X)</label>
-                        <input type="number" step="0.5" id="propFX" class="styled-input" value="${en.dx !== undefined ? en.dx : 0}">
+                    const row = document.createElement('div');
+                    row.className = 'control-row';
+                    row.style.marginTop = '10px';
+                    row.innerHTML = `
+                        <div class="control-group">
+                            <label>Fuerza X</label>
+                            <input type="number" step="0.5" id="propFX" class="styled-input" value="${en.dx !== undefined ? en.dx : 0}">
+                        </div>
+                        <div class="control-group">
+                            <label>Fuerza Y</label>
+                            <input type="number" step="0.5" id="propFY" class="styled-input" value="${en.dy !== undefined ? en.dy : -1.5}">
+                        </div>
                     `;
-                    extraPanel.appendChild(groupFX);
-
-                    const groupFY = document.createElement('div');
-                    groupFY.className = 'control-group';
-                    groupFY.style.marginTop = '10px';
-                    groupFY.innerHTML = `
-                        <label>Fuerza Y (Fuerza constante en Y)</label>
-                        <input type="number" step="0.5" id="propFY" class="styled-input" value="${en.dy !== undefined ? en.dy : -1.5}">
-                    `;
-                    extraPanel.appendChild(groupFY);
-
-                    document.getElementById('propFX').addEventListener('input', (e) => {
-                        en.dx = parseFloat(e.target.value) || 0;
-                        updateJSON();
-                    });
-                    document.getElementById('propFY').addEventListener('input', (e) => {
-                        en.dy = parseFloat(e.target.value) || 0;
-                        updateJSON();
-                    });
+                    extraPanel.appendChild(row);
+                    document.getElementById('propFX').addEventListener('input', (e) => { en.dx = parseFloat(e.target.value) || 0; updateJSON(); });
+                    document.getElementById('propFY').addEventListener('input', (e) => { en.dy = parseFloat(e.target.value) || 0; updateJSON(); });
                 } else if (en.type === 'speed_pad') {
-                    const groupBX = document.createElement('div');
-                    groupBX.className = 'control-group';
-                    groupBX.style.marginTop = '10px';
-                    groupBX.innerHTML = `
-                        <label>Impulso X (Boost X)</label>
-                        <input type="number" step="1" id="propBX" class="styled-input" value="${en.dx !== undefined ? en.dx : 15}">
+                    const row = document.createElement('div');
+                    row.className = 'control-row';
+                    row.style.marginTop = '10px';
+                    row.innerHTML = `
+                        <div class="control-group">
+                            <label>Boost X</label>
+                            <input type="number" step="1" id="propBX" class="styled-input" value="${en.dx !== undefined ? en.dx : 15}">
+                        </div>
+                        <div class="control-group">
+                            <label>Boost Y</label>
+                            <input type="number" step="1" id="propBY" class="styled-input" value="${en.dy !== undefined ? en.dy : 0}">
+                        </div>
                     `;
-                    extraPanel.appendChild(groupBX);
-
-                    const groupBY = document.createElement('div');
-                    groupBY.className = 'control-group';
-                    groupBY.style.marginTop = '10px';
-                    groupBY.innerHTML = `
-                        <label>Impulso Y (Boost Y)</label>
-                        <input type="number" step="1" id="propBY" class="styled-input" value="${en.dy !== undefined ? en.dy : 0}">
-                    `;
-                    extraPanel.appendChild(groupBY);
-
-                    document.getElementById('propBX').addEventListener('input', (e) => {
-                        en.dx = parseFloat(e.target.value) || 0;
-                        updateJSON();
-                    });
-                    document.getElementById('propBY').addEventListener('input', (e) => {
-                        en.dy = parseFloat(e.target.value) || 0;
-                        updateJSON();
-                    });
+                    extraPanel.appendChild(row);
+                    document.getElementById('propBX').addEventListener('input', (e) => { en.dx = parseFloat(e.target.value) || 0; updateJSON(); });
+                    document.getElementById('propBY').addEventListener('input', (e) => { en.dy = parseFloat(e.target.value) || 0; updateJSON(); });
                 } else if (en.type === 'timer') {
-                    const groupIn = document.createElement('div');
-                    groupIn.className = 'control-group';
-                    groupIn.style.marginTop = '10px';
-                    groupIn.innerHTML = `
-                        <label>Canal de Entrada (inputLinkId)</label>
-                        <input type="text" id="propLinkId" class="styled-input" value="${en.linkId || ''}">
+                    const row1 = document.createElement('div');
+                    row1.className = 'control-row';
+                    row1.style.marginTop = '10px';
+                    row1.innerHTML = `
+                        <div class="control-group">
+                            <label>Entrada (Link)</label>
+                            <input type="text" id="propLinkId" class="styled-input" value="${en.linkId || ''}">
+                        </div>
+                        <div class="control-group">
+                            <label>Salida (Link)</label>
+                            <input type="text" id="propOutputLinkId" class="styled-input" value="${en.outputLinkId || ''}">
+                        </div>
                     `;
-                    extraPanel.appendChild(groupIn);
-
-                    const groupOut = document.createElement('div');
-                    groupOut.className = 'control-group';
-                    groupOut.style.marginTop = '10px';
-                    groupOut.innerHTML = `
-                        <label>Canal de Salida (outputLinkId)</label>
-                        <input type="text" id="propOutputLinkId" class="styled-input" value="${en.outputLinkId || ''}">
-                    `;
-                    extraPanel.appendChild(groupOut);
+                    extraPanel.appendChild(row1);
 
                     const groupDur = document.createElement('div');
                     groupDur.className = 'control-group';
@@ -318,107 +274,102 @@ export function updateProperties() {
                     `;
                     extraPanel.appendChild(groupDur);
 
-                    document.getElementById('propLinkId').addEventListener('input', (e) => {
-                        en.linkId = e.target.value || '';
-                        updateJSON();
-                    });
-                    document.getElementById('propOutputLinkId').addEventListener('input', (e) => {
-                        en.outputLinkId = e.target.value || '';
-                        updateJSON();
-                    });
-                    document.getElementById('propDuration').addEventListener('input', (e) => {
-                        en.duration = parseFloat(e.target.value) || 2.0;
-                        updateJSON();
-                    });
+                    document.getElementById('propLinkId').addEventListener('input', (e) => { en.linkId = e.target.value || ''; updateJSON(); });
+                    document.getElementById('propOutputLinkId').addEventListener('input', (e) => { en.outputLinkId = e.target.value || ''; updateJSON(); });
+                    document.getElementById('propDuration').addEventListener('input', (e) => { en.duration = parseFloat(e.target.value) || 2.0; updateJSON(); });
                 } else if (en.type === 'portal') {
                     const groupPortal = document.createElement('div');
                     groupPortal.className = 'control-group';
                     groupPortal.style.marginTop = '10px';
                     groupPortal.innerHTML = `
-                        <label>Número de Portal (Enlace por Número)</label>
+                        <label>Número de Portal</label>
                         <input type="number" step="1" id="propCpIndex" class="styled-input" value="${en.checkpointIndex !== undefined ? en.checkpointIndex : 1}">
                     `;
                     extraPanel.appendChild(groupPortal);
-
-                    document.getElementById('propCpIndex').addEventListener('input', (e) => {
-                        en.checkpointIndex = parseInt(e.target.value) || 1;
-                        updateJSON();
-                    });
+                    document.getElementById('propCpIndex').addEventListener('input', (e) => { en.checkpointIndex = parseInt(e.target.value) || 1; updateJSON(); });
                 } else if (en.type === 'boss') {
-                    const groupBoss = document.createElement('div');
-                    groupBoss.className = 'control-group';
-                    groupBoss.style.marginTop = '10px';
-                    groupBoss.innerHTML = `
-                        <label>Señal de Daño (inputLinkId)</label>
-                        <input type="text" id="propLinkId" class="styled-input" value="${en.linkId || ''}" placeholder="ID del interruptor/compuerta">
-                        
-                        <label style="margin-top:10px; display:block;">Nombre del Jefe</label>
-                        <input type="text" id="propBossName" class="styled-input" value="${en.name || ''}" placeholder="Ej: Asmodeus">
-
-                        
-                        <label style="margin-top:10px; display:block;">Estilo de Combate (Tipo)</label>
-                        <select id="propBossType" class="styled-input">
-                            <option value="scatter" ${en.bossType === 'scatter' ? 'selected' : ''}>Dispersor Caótico (Scatter)</option>
-                            <option value="tracker" ${en.bossType === 'tracker' ? 'selected' : ''}>Cazador Preciso (Tracker)</option>
-                            <option value="spinner" ${en.bossType === 'spinner' ? 'selected' : ''}>Hélice Mortal (Spinner)</option>
+                    const groupBossType = document.createElement('div');
+                    groupBossType.className = 'control-group';
+                    groupBossType.style.marginTop = '10px';
+                    groupBossType.innerHTML = `
+                        <label>Estilo de Combate</label>
+                        <select id="propBossType" class="styled-input" style="padding: 4px; border-radius: 4px; background: #252525; color: white; border: 1px solid #444; width: 100%;">
+                            <option value="scatter" ${en.bossType === 'scatter' ? 'selected' : ''}>Dispersor Caótico</option>
+                            <option value="tracker" ${en.bossType === 'tracker' ? 'selected' : ''}>Cazador Preciso</option>
+                            <option value="spinner" ${en.bossType === 'spinner' ? 'selected' : ''}>Hélice Mortal</option>
                         </select>
-                        
-                        <label style="margin-top:10px; display:block;">Puntos de Vida (Golpes)</label>
-                        <input type="number" step="1" id="propHealth" class="styled-input" value="${en.health !== undefined ? en.health : 5}">
-                        
-                        <label style="margin-top:10px; display:block;">Fases de Dificultad</label>
-                        <input type="number" step="1" id="propPhases" class="styled-input" value="${en.phases !== undefined ? en.phases : 2}">
-                        
-                        <label style="margin-top:10px; display:block;">Velocidad de Movimiento (px/s)</label>
-                        <input type="number" step="1" id="propSpeed" class="styled-input" value="${en.speed !== undefined ? en.speed : 150}">
-                        
-                        <label style="margin-top:10px; display:block;">Densidad de Ataque</label>
-                        <input type="number" step="1" id="propAttackDensity" class="styled-input" value="${en.attackDensity !== undefined ? en.attackDensity : 3}">
-                        
-                        <label style="margin-top:10px; display:block;">Frecuencia de Ataque (Segundos)</label>
-                        <input type="number" step="0.1" id="propAttackFrequency" class="styled-input" value="${en.attackFrequency !== undefined ? en.attackFrequency : 2.0}">
-                        
-                        <label style="margin-top:10px; display:block;">Ataques Normales para Especial</label>
-                        <input type="number" step="1" id="propSpecialAttackFrequency" class="styled-input" value="${en.specialAttackFrequency !== undefined ? en.specialAttackFrequency : 3}">
                     `;
-                    extraPanel.appendChild(groupBoss);
+                    extraPanel.appendChild(groupBossType);
 
-                    document.getElementById('propLinkId').addEventListener('input', (e) => {
-                        en.linkId = e.target.value || '';
-                        updateJSON();
-                    });
-                    document.getElementById('propBossName').addEventListener('input', (e) => {
-                        en.name = e.target.value || '';
-                        updateJSON();
-                    });
-                    document.getElementById('propBossType').addEventListener('change', (e) => {
-                        en.bossType = e.target.value;
-                        updateJSON();
-                    });
-                    document.getElementById('propHealth').addEventListener('input', (e) => {
-                        en.health = parseInt(e.target.value) || 5;
-                        updateJSON();
-                    });
-                    document.getElementById('propPhases').addEventListener('input', (e) => {
-                        en.phases = parseInt(e.target.value) || 2;
-                        updateJSON();
-                    });
-                    document.getElementById('propSpeed').addEventListener('input', (e) => {
-                        en.speed = parseFloat(e.target.value) || 150;
-                        updateJSON();
-                    });
-                    document.getElementById('propAttackDensity').addEventListener('input', (e) => {
-                        en.attackDensity = parseInt(e.target.value) || 3;
-                        updateJSON();
-                    });
-                    document.getElementById('propAttackFrequency').addEventListener('input', (e) => {
-                        en.attackFrequency = parseFloat(e.target.value) || 2.0;
-                        updateJSON();
-                    });
-                    document.getElementById('propSpecialAttackFrequency').addEventListener('input', (e) => {
-                        en.specialAttackFrequency = parseInt(e.target.value) || 3;
-                        updateJSON();
-                    });
+                    const row1 = document.createElement('div');
+                    row1.className = 'control-row';
+                    row1.style.marginTop = '10px';
+                    row1.innerHTML = `
+                        <div class="control-group">
+                            <label>Daño (Input)</label>
+                            <input type="text" id="propLinkId" class="styled-input" value="${en.linkId || ''}">
+                        </div>
+                        <div class="control-group">
+                            <label>Nombre</label>
+                            <input type="text" id="propBossName" class="styled-input" value="${en.name || ''}">
+                        </div>
+                    `;
+                    extraPanel.appendChild(row1);
+
+                    const row2 = document.createElement('div');
+                    row2.className = 'control-row';
+                    row2.style.marginTop = '10px';
+                    row2.innerHTML = `
+                        <div class="control-group">
+                            <label>Vida (PV)</label>
+                            <input type="number" step="1" id="propHealth" class="styled-input" value="${en.health !== undefined ? en.health : 5}">
+                        </div>
+                        <div class="control-group">
+                            <label>Fases</label>
+                            <input type="number" step="1" id="propPhases" class="styled-input" value="${en.phases !== undefined ? en.phases : 2}">
+                        </div>
+                    `;
+                    extraPanel.appendChild(row2);
+
+                    const row3 = document.createElement('div');
+                    row3.className = 'control-row';
+                    row3.style.marginTop = '10px';
+                    row3.innerHTML = `
+                        <div class="control-group">
+                            <label>Velocidad</label>
+                            <input type="number" step="1" id="propSpeed" class="styled-input" value="${en.speed !== undefined ? en.speed : 150}">
+                        </div>
+                        <div class="control-group">
+                            <label>Densidad Atq.</label>
+                            <input type="number" step="1" id="propAttackDensity" class="styled-input" value="${en.attackDensity !== undefined ? en.attackDensity : 3}">
+                        </div>
+                    `;
+                    extraPanel.appendChild(row3);
+
+                    const row4 = document.createElement('div');
+                    row4.className = 'control-row';
+                    row4.style.marginTop = '10px';
+                    row4.innerHTML = `
+                        <div class="control-group">
+                            <label>Frecuencia Atq.</label>
+                            <input type="number" step="0.1" id="propAttackFrequency" class="styled-input" value="${en.attackFrequency !== undefined ? en.attackFrequency : 2.0}">
+                        </div>
+                        <div class="control-group">
+                            <label>Golpes x Especial</label>
+                            <input type="number" step="1" id="propSpecialAttackFrequency" class="styled-input" value="${en.specialAttackFrequency !== undefined ? en.specialAttackFrequency : 3}">
+                        </div>
+                    `;
+                    extraPanel.appendChild(row4);
+
+                    document.getElementById('propLinkId').addEventListener('input', (e) => { en.linkId = e.target.value || ''; updateJSON(); });
+                    document.getElementById('propBossName').addEventListener('input', (e) => { en.name = e.target.value || ''; updateJSON(); });
+                    document.getElementById('propBossType').addEventListener('change', (e) => { en.bossType = e.target.value; updateJSON(); });
+                    document.getElementById('propHealth').addEventListener('input', (e) => { en.health = parseInt(e.target.value) || 5; updateJSON(); });
+                    document.getElementById('propPhases').addEventListener('input', (e) => { en.phases = parseInt(e.target.value) || 2; updateJSON(); });
+                    document.getElementById('propSpeed').addEventListener('input', (e) => { en.speed = parseFloat(e.target.value) || 150; updateJSON(); });
+                    document.getElementById('propAttackDensity').addEventListener('input', (e) => { en.attackDensity = parseInt(e.target.value) || 3; updateJSON(); });
+                    document.getElementById('propAttackFrequency').addEventListener('input', (e) => { en.attackFrequency = parseFloat(e.target.value) || 2.0; updateJSON(); });
+                    document.getElementById('propSpecialAttackFrequency').addEventListener('input', (e) => { en.specialAttackFrequency = parseInt(e.target.value) || 3; updateJSON(); });
                 }
             }
         }

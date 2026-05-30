@@ -36,10 +36,10 @@
 .control-group-vertical label { font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
 
 #propertiesPanel {
-    flex: 0 0 auto !important;
+    flex: 1 1 0% !important;
     height: auto !important;
     min-height: 0 !important;
-    overflow: visible !important;
+    overflow-y: auto !important;
     display: flex;
     flex-direction: column;
 }
