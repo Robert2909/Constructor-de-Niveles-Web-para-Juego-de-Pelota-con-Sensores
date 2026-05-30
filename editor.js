@@ -1,7 +1,7 @@
 import { state, saveState } from './js/state.js';
 import { Entity } from './js/entities.js';
 import { render } from './js/renderer.js';
-import { initInputHandlers, initKeyboardHandlers } from './js/input-handler.js';
+import { initInputHandlers, initKeyboardHandlers, updateActiveTool } from './js/input-handler.js';
 import { centerLevel, updateProperties, updateJSON, transformSelection, scaleSelection, optimizeEntities, showOSD, bringSelectionToFront, sendSelectionToBack, alignSelection, distributeSelection, getLevelJSON } from './js/utils.js';
 import { updateRulers, initRulerListeners } from './js/rulers.js';
 
@@ -164,6 +164,7 @@ document.querySelectorAll('.tool-btn').forEach(btn => {
             btn.classList.add('active');
             state.currentTool = btn.dataset.type;
         }
+        updateActiveTool();
         updateProperties();
         callRender();
     });
@@ -512,6 +513,7 @@ document.getElementById('modeBlock')?.addEventListener('click', () => {
     state.isBrushMode = false;
     document.getElementById('modeBlock').classList.add('active');
     document.getElementById('modeBrush').classList.remove('active');
+    updateActiveTool();
     showOSD('MODO DE CONSTRUCCIÓN', 'Modo Bloque', '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>');
 });
 
@@ -519,6 +521,7 @@ document.getElementById('modeBrush')?.addEventListener('click', () => {
     state.isBrushMode = true;
     document.getElementById('modeBrush').classList.add('active');
     document.getElementById('modeBlock').classList.remove('active');
+    updateActiveTool();
     showOSD('MODO DE CONSTRUCCIÓN', 'Modo Pincel', '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>');
 });
 

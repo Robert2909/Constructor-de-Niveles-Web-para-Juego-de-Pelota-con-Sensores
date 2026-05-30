@@ -7,6 +7,9 @@ export function showOSD(title, value, icon) {
         document.body.appendChild(container);
     }
 
+    // Clear previous toasts so they don't stack visually
+    container.innerHTML = '';
+
     const osd = document.createElement('div');
     osd.className = 'osd-toast';
     
@@ -17,7 +20,7 @@ export function showOSD(title, value, icon) {
 
     osd.innerHTML = `
         ${iconHtml}
-        <div class="osd-content">
+        <div class="osd-content" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
             <div class="osd-title">${title}</div>
             <div class="osd-value">${value}</div>
         </div>
